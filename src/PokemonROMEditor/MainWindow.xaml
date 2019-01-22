@@ -1,0 +1,426 @@
+﻿<Window x:Class="PokemonROMEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:core="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:PokemonROMEditor"
+        xmlns:model="clr-namespace:PokemonROMEditor.Models"
+        xmlns:viewmodels="clr-namespace:PokemonROMEditor.ViewModels"
+        mc:Ignorable="d"
+        Title="Pokemon ROM Editor" Height="768" Width="1024">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="boolToVis" />
+        <viewmodels:ShowStonesBoolConverter x:Key="showStonesBool" />
+        <viewmodels:ShowLevelBoolConverter x:Key="showLevelBool" />
+        <ObjectDataProvider x:Key="typesEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:PokeType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="moveEffectsEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:MoveEffect" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="evolveTypeEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:EvolveType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="evolveStoneEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:EvolveStone" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="damageModEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:DamageModifier" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="itemEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:ItemType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="growthEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:GrowthType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="20" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="1">
+            <Button Command="{Binding OpenROMFile}" Content="Open" Width="40" HorizontalAlignment="Left"/>
+            <Button Command="{Binding SaveROMFileAs}" Content="Save As" Width="60" HorizontalAlignment="Left"/>
+        </StackPanel>
+        <TabControl Grid.Row="1" Grid.Column="1">
+            <TabItem Header="Pokemon" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ListView ItemsSource="{Binding Pokemons}" SelectedItem="{Binding SelectedPokemon}" Grid.Row="0" Grid.Column="0" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Name}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Grid Grid.Row="0" Grid.Column="1" Visibility="{Binding Path=IsPokemonSelected, Converter={StaticResource boolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Name:" Grid.Column="0" Grid.Row="0"/>
+                        <TextBlock Text="Pokedex ID:" Grid.Column="0" Grid.Row="1"/>
+                        <TextBlock Text="Base HP:" Grid.Column="0" Grid.Row="2"/>
+                        <TextBlock Text="Base Attack:" Grid.Column="0" Grid.Row="3"/>
+                        <TextBlock Text="Base Defense:" Grid.Column="0" Grid.Row="4"/>
+                        <TextBlock Text="Base Speed:" Grid.Column="0" Grid.Row="5"/>
+                        <TextBlock Text="Base Special:" Grid.Column="0" Grid.Row="6"/>
+                        <TextBlock Text="Base Stats Total: " Grid.Column="0" Grid.Row="7"/>
+                        <TextBlock Text="Type1:" Grid.Column="0" Grid.Row="9"/>
+                        <TextBlock Text="Type2:" Grid.Column="0" Grid.Row="10"/>
+                        <TextBlock Text="{Binding SelectedPokemon.Name}" Grid.Column="1" Grid.Row="0"/>
+                        <TextBlock Text="{Binding SelectedPokemon.PokedexID}" Grid.Column="1" Grid.Row="1"/>
+                        <TextBox Text="{Binding SelectedPokemon.HP}" Grid.Column="1" Grid.Row="2"/>
+                        <TextBox Text="{Binding SelectedPokemon.Attack}" Grid.Column="1" Grid.Row="3"/>
+                        <TextBox Text="{Binding SelectedPokemon.Defense}" Grid.Column="1" Grid.Row="4"/>
+                        <TextBox Text="{Binding SelectedPokemon.Speed}" Grid.Column="1" Grid.Row="5"/>
+                        <TextBox Text="{Binding SelectedPokemon.Special}" Grid.Column="1" Grid.Row="6"/>
+                        <TextBlock Text="{Binding SelectedPokemon.StatTotal}" Grid.Column="1" Grid.Row="7"/>
+                        <TextBlock Text="Growth Rate:" Grid.Column="0" Grid.Row="8"/>
+                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.GrowthRate}" ItemsSource="{Binding Source={StaticResource growthEnum}}" Grid.Column="1" Grid.Row="8"/>
+                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.Type1}" ItemsSource="{Binding Source={StaticResource typesEnum}}" Grid.Column="1" Grid.Row="9"/>
+                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.Type2}" ItemsSource="{Binding Source={StaticResource typesEnum}}" Grid.Column="1" Grid.Row="10"/>
+                        <TextBlock Text="Starting Moves" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="11"/>
+                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move1}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="12" Grid.ColumnSpan="2"/>
+                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move2}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="13" Grid.ColumnSpan="2"/>
+                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move3}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="14" Grid.ColumnSpan="2"/>
+                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move4}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="15" Grid.ColumnSpan="2"/>
+
+                        <TextBlock Text="Evolution" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="16"/>
+                        <ListView ItemsSource="{Binding SelectedPokemon.Evolutions}" Grid.Column="0" Grid.Row="17" Grid.ColumnSpan="2">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" >
+                                        <ComboBox SelectedItem="{Binding Path=Evolve}" ItemsSource="{Binding Source={StaticResource evolveTypeEnum}}" />
+                                        <TextBox Text="{Binding EvolveLevel}" Visibility="{Binding Evolve, Converter={StaticResource showLevelBool}}"/>
+                                        <ComboBox SelectedItem="{Binding Path=EvolutionStone}" ItemsSource="{Binding Source={StaticResource evolveStoneEnum}}" Visibility="{Binding Evolve, Converter={StaticResource showStonesBool}}"/>
+                                        <ComboBox SelectedIndex="{Binding Path=EvolveTo}" ItemsSource="{Binding DataContext.Pokemons, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name" Visibility="{Binding Path=DoesPokemonEvolve, Converter={StaticResource boolToVis}}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                    <Grid Grid.Row="0" Grid.Column="2" Visibility="{Binding Path=IsPokemonSelected, Converter={StaticResource boolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="TMs" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
+                        <ListView ItemsSource="{Binding PokemonTMs}" Grid.Column="0" Grid.Row="1">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding TMMoveName}" IsChecked="{Binding CanLearn}" />
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                    <Grid Grid.Row="0" Grid.Column="3" Visibility="{Binding Path=IsPokemonSelected, Converter={StaticResource boolToVis}}">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Move Bytes Left: " HorizontalAlignment="Center"/>
+                                <TextBlock Text ="{Binding ExtraMoveBytes}" />
+                            </StackPanel>
+                            <ListView ItemsSource="{Binding SelectedPokemon.LearnedMoves}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
+                                            <Button Content=" X " Command="{Binding DataContext.DeleteLearnedMove, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}" />
+                                            <TextBlock Text=" Level: " VerticalAlignment="Center"/>
+                                            <TextBox Text="{Binding Level}" MinWidth="40" TextAlignment="Center"/>
+                                            <ComboBox SelectedIndex="{Binding Path=MoveID}" ItemsSource="{Binding DataContext.MoveNames, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <Button Command="{Binding AddLearnedMove}" Content="Add Move" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Moves">
+                <DataGrid  ItemsSource="{Binding Moves}" AlternatingRowBackground="#EEEEEE" CanUserAddRows="False" CanUserDeleteRows="False"
+                  AutoGenerateColumns="False" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}" CanUserSortColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" />
+                        <DataGridComboBoxColumn Header="Type" SelectedItemBinding="{Binding Path=MoveType}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
+                        <DataGridTextColumn Header="Power" Binding="{Binding Path=Power}" />
+                        <DataGridTextColumn Header="Accuracy" Binding="{Binding Path=Accuracy}" />
+                        <DataGridTextColumn Header="PP" Binding="{Binding Path=PP}" />
+                        <DataGridComboBoxColumn Header="Type" SelectedItemBinding="{Binding Path=Effect}" ItemsSource="{Binding Source={StaticResource moveEffectsEnum}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="TMs">
+                <ListView ItemsSource="{Binding AllTMs}" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}" Grid.Row="1" Grid.Column="0">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding TMName}" MinWidth="40" VerticalAlignment="Center"/>
+                                <ComboBox SelectedIndex="{Binding Path=MoveID}" ItemsSource="{Binding DataContext.MoveNames, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name" Width="150"/>
+                                <TextBlock Text=" Price in Thousands: " />
+                                <TextBox Text="{Binding Price}" MinWidth="30"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </TabItem>
+            <TabItem Header="Types">
+                <Grid Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Button Grid.Column="0" Grid.Row="0" Content="Add Row" Command="{Binding AddTypeStrength}" />
+                    <DataGrid  ItemsSource="{Binding TypeStrengths}" AlternatingRowBackground="LightGray" CanUserAddRows="False" CanUserDeleteRows="False"
+                        AutoGenerateColumns="False" ScrollViewer.CanContentScroll="True"
+                            Grid.Column="0" Grid.Row="1">
+                    <DataGrid.Columns>
+                        <DataGridComboBoxColumn Header="Attacking Type" SelectedItemBinding="{Binding Path=AttackType}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
+                        <DataGridComboBoxColumn Header="Defending Type" SelectedItemBinding="{Binding Path=DefenseType}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
+                        <DataGridComboBoxColumn Header="Effectiveness" SelectedItemBinding="{Binding Path=Effectiveness}" ItemsSource="{Binding Source={StaticResource damageModEnum}}"/>
+                        <DataGridTemplateColumn Header="Delete">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content=" X " Command="{Binding DataContext.DeleteTypeStrength, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Encounters">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ListView ItemsSource="{Binding EncounterZones}" SelectedItem="{Binding SelectedEncounterZone}" Grid.Row="0" Grid.Column="0" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding ZoneName}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Grid Grid.Row="0" Grid.Column="1" Visibility="{Binding Path=IsZoneSelected, Converter={StaticResource boolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Zone Encounter Rate: " Grid.Row="0" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.EncounterRate}" Grid.Row="0" Grid.Column="1" MinWidth="30"/>
+                        
+                        <TextBlock Text="20% Spawn Chance ->  Level: " Grid.Row="1" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc1.Level}" Grid.Row="1" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc1.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="1" Grid.Column="2" />
+                        
+                        <TextBlock Text="20% Spawn Chance ->  Level: " Grid.Row="2" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc2.Level}" Grid.Row="2" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc2.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="2" Grid.Column="2" />
+                        
+                        <TextBlock Text="15% Spawn Chance ->  Level: " Grid.Row="3" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc3.Level}" Grid.Row="3" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc3.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="3" Grid.Column="2" />
+                        
+                        <TextBlock Text="10% Spawn Chance ->  Level: " Grid.Row="4" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc4.Level}" Grid.Row="4" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc4.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="4" Grid.Column="2" />
+                        
+                        <TextBlock Text="10% Spawn Chance ->  Level: " Grid.Row="5" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc5.Level}" Grid.Row="5" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc5.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="5" Grid.Column="2" />
+                        
+                        <TextBlock Text="10% Spawn Chance ->  Level: " Grid.Row="6" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc6.Level}" Grid.Row="6" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc6.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="6" Grid.Column="2" />
+                        
+                        <TextBlock Text="5% Spawn Chance ->  Level: " Grid.Row="7" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc7.Level}" Grid.Row="7" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc7.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="7" Grid.Column="2" />
+                        
+                        <TextBlock Text="5% Spawn Chance ->  Level: " Grid.Row="8" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc8.Level}" Grid.Row="8" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc8.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="8" Grid.Column="2" />
+                        
+                        <TextBlock Text="4% Spawn Chance ->  Level: " Grid.Row="9" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc9.Level}" Grid.Row="9" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc9.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="9" Grid.Column="2" />
+                        
+                        <TextBlock Text="1% Spawn Chance ->  Level: " Grid.Row="10" Grid.Column="0"/>
+                        <TextBox Text="{Binding SelectedEncounterZone.Enc10.Level}" Grid.Row="10" Grid.Column="1" />
+                        <ComboBox SelectedIndex="{Binding Path=SelectedEncounterZone.Enc10.PokedexID}" ItemsSource="{Binding Path=Pokemons}" DisplayMemberPath="Name" Grid.Row="10" Grid.Column="2" />
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Trainers">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ListView ItemsSource="{Binding Trainers}" SelectedItem="{Binding SelectedTrainer}" Grid.Row="0" Grid.Column="0" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding TrainerName}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Grid Grid.Row="0" Grid.Column="1" Visibility="{Binding Path=IsTrainerSelected, Converter={StaticResource boolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                            <TextBlock Text="Trainer Bytes Left: " HorizontalAlignment="Center"/>
+                            <TextBlock Text ="{Binding ExtraTrainerBytes}" />
+                        </StackPanel>
+                        <CheckBox Content="All Same Level " IsChecked="{Binding SelectedTrainer.AllSameLevel}" Grid.Row="1" Grid.Column="0" />
+                        <TextBox Text="{Binding SelectedTrainer.PartyLevel}" Visibility="{Binding Path=SelectedTrainer.AllSameLevel, Converter={StaticResource boolToVis}}" Grid.Row="1" Grid.Column="1"/>
+                        <StackPanel Orientation="Vertical" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                            <ListView ItemsSource="{Binding SelectedTrainer.Pokemons}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
+                                            <Button Content=" X " Command="{Binding DataContext.DeleteTrainerPokemon, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}" />
+                                            <TextBlock Text=" Level: " VerticalAlignment="Center"/>
+                                            <TextBox Text="{Binding Level}" MinWidth="40" TextAlignment="Center"/>
+                                            <ComboBox SelectedIndex="{Binding Path=PokedexID}" ItemsSource="{Binding DataContext.Pokemons, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <Button Command="{Binding AddTrainerPokemon}" Content="Add Pokemon" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Shops">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ListView ItemsSource="{Binding Shops}" SelectedItem="{Binding SelectedShop}" Grid.Row="0" Grid.Column="0" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding ShopName}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Grid Grid.Row="0" Grid.Column="1" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
+                        <StackPanel Orientation="Vertical" Visibility="{Binding Path=IsShopSelected, Converter={StaticResource boolToVis}}">
+                            <TextBlock Text="Items"/>
+                            <ListView ItemsSource="{Binding SelectedShop.Items}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
+                                            <ComboBox SelectedItem="{Binding Path=ItemID}" ItemsSource="{Binding Source={StaticResource itemEnum}}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>
