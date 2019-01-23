@@ -4,16 +4,10 @@
 * Pokemon RED
 
 ## Features
-* Edit Pokemon stats
-  * Base stats
-  * Evolutions
-  * TMs
-  * Starting moves
-  * Moves learned through leveling
+* Edit Pokemon stats  
+  
+![Pokemon Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/PokemonTab.PNG)
   
 * Edit Moves
-  * Name
-  * Power
-  * Accuracy
-  * Effect
-  * PP
+
+![Moves Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/MovesTab.PNG)
