@@ -378,7 +378,7 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
-        public bool CanSaveAs()
+        public bool CanSave()
         {
             return (ExtraTrainerBytes >= 0 && ExtraMoveBytes >= 0 && DataLoaded);
         }
@@ -499,7 +499,7 @@ namespace PokemonROMEditor.ViewModels
                     {
                         SaveFileAs();
                     },
-                    x => CanSaveAs()
+                    x => CanSave()
                     ));
             }
         }
