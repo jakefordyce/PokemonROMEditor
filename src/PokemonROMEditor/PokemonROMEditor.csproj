@@ -55,13 +55,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Models\ByteRangeRule.cs" />
     <Compile Include="Models\Move.cs" />
     <Compile Include="Models\Pokemon.cs" />
     <Compile Include="Models\ROMConverter.cs" />
     <Compile Include="Models\Items.cs" />
     <Compile Include="Models\TypeStrength.cs" />
     <Compile Include="Models\Battles.cs" />
+    <Compile Include="Models\ValidationRules.cs" />
     <Compile Include="ViewModels\Converters.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="ViewModels\ROMEditorViewModel.cs" />

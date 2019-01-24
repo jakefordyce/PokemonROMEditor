@@ -35,4 +35,32 @@ namespace PokemonROMEditor.Models
             }
         }
     }
+
+    public class LevelRangeRule : ValidationRule
+    {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        {
+            int level = 0;
+
+            try
+            {
+                if (((string)value).Length > 0)
+                    level = Int32.Parse((String)value);
+            }
+            catch (Exception e)
+            {
+                return new ValidationResult(false, "Illegal characters or " + e.Message);
+            }
+
+            if ((level < 1) || (level > 100))
+            {
+                return new ValidationResult(false,
+                  "Please enter a value in the range: " + 1 + " - " + 100 + ".");
+            }
+            else
+            {
+                return ValidationResult.ValidResult;
+            }
+        }
+    }
 }

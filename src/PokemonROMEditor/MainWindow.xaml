@@ -184,7 +184,15 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" >
                                         <ComboBox SelectedItem="{Binding Path=Evolve}" ItemsSource="{Binding Source={StaticResource evolveTypeEnum}}" />
-                                        <TextBox Text="{Binding EvolveLevel}" Visibility="{Binding Evolve, Converter={StaticResource showLevelBool}}"/>
+                                        <TextBox Visibility="{Binding Evolve, Converter={StaticResource showLevelBool}}">
+                                            <TextBox.Text>
+                                                <Binding Path="EvolveLevel">
+                                                    <Binding.ValidationRules>
+                                                        <model:LevelRangeRule/>
+                                                    </Binding.ValidationRules>
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
                                         <ComboBox SelectedItem="{Binding Path=EvolutionStone}" ItemsSource="{Binding Source={StaticResource evolveStoneEnum}}" Visibility="{Binding Evolve, Converter={StaticResource showStonesBool}}"/>
                                         <ComboBox SelectedIndex="{Binding Path=EvolveTo}" ItemsSource="{Binding DataContext.Pokemons, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name" Visibility="{Binding Path=DoesPokemonEvolve, Converter={StaticResource boolToVis}}"/>
                                     </StackPanel>
@@ -221,7 +229,15 @@
                                         <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
                                             <Button Content=" X " Command="{Binding DataContext.DeleteLearnedMove, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}" />
                                             <TextBlock Text=" Level: " VerticalAlignment="Center"/>
-                                            <TextBox Text="{Binding Level}" MinWidth="40" TextAlignment="Center"/>
+                                            <TextBox MinWidth="40" TextAlignment="Center">
+                                                <TextBox.Text>
+                                                    <Binding Path="Level">
+                                                        <Binding.ValidationRules>
+                                                            <model:LevelRangeRule/>
+                                                        </Binding.ValidationRules>
+                                                    </Binding>
+                                                </TextBox.Text>
+                                            </TextBox>
                                             <ComboBox SelectedIndex="{Binding Path=MoveID}" ItemsSource="{Binding DataContext.MoveNames, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name"/>
                                         </StackPanel>
                                     </DataTemplate>
