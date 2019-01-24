@@ -399,48 +399,7 @@ namespace PokemonROMEditor.ViewModels
             Shops = new ObservableCollection<Shop>();
         }
 
-        #region Public Methods
-
-        public void OpenFile()
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            // for now just looking for regular Gameboy roms since this is designed for Pokemon Red.
-            ofd.DefaultExt = ".gb";
-            ofd.Filter = "GameBoy Rom Files (*.gb)|*.gb";
-
-            bool? result = ofd.ShowDialog();
-            if (result == true)
-            {
-                romFile = ofd.FileName;
-                romConverter.LoadROMDataFromFile(romFile);
-                Moves = romConverter.LoadMoves();
-                Pokemons = romConverter.LoadPokemon();
-                AllTMs = romConverter.LoadTMs();
-                moveByteMax = romConverter.GetMaxMoveBytes();
-                TypeStrengths = romConverter.LoadTypeStrengths();
-                EncounterZones = romConverter.LoadWildEncounters();
-                Trainers = romConverter.LoadTrainers();
-                trainerByteMax = romConverter.GetMaxTrainerBytes();
-                Shops = romConverter.LoadShops();
-                DataLoaded = true;
-            }
-        }
-
-        public void SaveFileAs()
-        {
-            SaveFileDialog ofd = new SaveFileDialog();            
-            // for now just looking for regular Gameboy roms since this is designed for Pokemon Red.
-            ofd.DefaultExt = ".gb";
-            ofd.Filter = "GameBoy Rom Files (*.gb)|*.gb";
-
-            bool? result = ofd.ShowDialog();
-            if (result == true)
-            {
-                romFile = ofd.FileName;
-                romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops);
-                DataLoaded = true;
-            }
-        }
+        #region Public Methods        
 
         private ICommand addLearnedMove;
 
@@ -498,6 +457,22 @@ namespace PokemonROMEditor.ViewModels
                     x =>
                     {
                         SaveFileAs();
+                    },
+                    x => CanSave()
+                    ));
+            }
+        }
+
+        private ICommand saveROMFile;
+
+        public ICommand SaveROMFile
+        {
+            get
+            {
+                return saveROMFile ?? (saveROMFile = new RelayCommand(
+                    x =>
+                    {
+                        SaveFile();
                     },
                     x => CanSave()
                     ));
@@ -562,11 +537,59 @@ namespace PokemonROMEditor.ViewModels
                         CountTrainerBytes();
                     }));
             }
-        }        
+        }
 
         #endregion
 
         #region Private Methods
+
+        private void OpenFile()
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            // for now just looking for regular Gameboy roms since this is designed for Pokemon Red.
+            ofd.DefaultExt = ".gb";
+            ofd.Filter = "GameBoy Rom Files (*.gb)|*.gb";
+
+            bool? result = ofd.ShowDialog();
+            if (result == true)
+            {
+                romFile = ofd.FileName;
+                romConverter.LoadROMDataFromFile(romFile);
+                Moves = romConverter.LoadMoves();
+                Pokemons = romConverter.LoadPokemon();
+                AllTMs = romConverter.LoadTMs();
+                moveByteMax = romConverter.GetMaxMoveBytes();
+                TypeStrengths = romConverter.LoadTypeStrengths();
+                EncounterZones = romConverter.LoadWildEncounters();
+                Trainers = romConverter.LoadTrainers();
+                trainerByteMax = romConverter.GetMaxTrainerBytes();
+                Shops = romConverter.LoadShops();
+                DataLoaded = true;
+            }
+        }
+
+        private void SaveFileAs()
+        {
+            SaveFileDialog ofd = new SaveFileDialog();
+            // for now just looking for regular Gameboy roms since this is designed for Pokemon Red.
+            ofd.DefaultExt = ".gb";
+            ofd.Filter = "GameBoy Rom Files (*.gb)|*.gb";
+
+            bool? result = ofd.ShowDialog();
+            if (result == true)
+            {
+                romFile = ofd.FileName;
+                romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops);
+                DataLoaded = true;
+            }
+        }
+
+        private void SaveFile()
+        {
+            romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops);
+            DataLoaded = true;
+        }
+
         private void UpdatePokemonTMNames()
         {
             if (SelectedPokemon != null)
