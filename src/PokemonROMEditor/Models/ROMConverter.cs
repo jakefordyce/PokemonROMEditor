@@ -408,14 +408,21 @@ namespace PokemonROMEditor.Models
         {
             var typeStrengths = new ObservableCollection<TypeStrength>();
             
-            TypeStrength typeStrengthToAdd;            
+            TypeStrength typeStrengthToAdd;
             for (int i = 0; i < 82; i++) //There are 82 type strengths. Each is 3 bytes and the group is terminated by the byte FF.
             {
-                typeStrengthToAdd = new TypeStrength();
-                typeStrengthToAdd.AttackType = (PokeType)romData[typeChartByte + (i * 3)]; //first byte is the attacking type
-                typeStrengthToAdd.DefenseType = (PokeType)romData[typeChartByte + (i * 3) + 1]; //second byte is the defending type
-                typeStrengthToAdd.Effectiveness = (DamageModifier)romData[typeChartByte + (i * 3) + 2]; //third byte is effectiveness X 10. So double damage = 20, half damage = 5.
-                typeStrengths.Add(typeStrengthToAdd);
+                if(romData[typeChartByte + (i * 3)] != 0xFF)
+                {
+                    typeStrengthToAdd = new TypeStrength();
+                    typeStrengthToAdd.AttackType = (PokeType)romData[typeChartByte + (i * 3)]; //first byte is the attacking type
+                    typeStrengthToAdd.DefenseType = (PokeType)romData[typeChartByte + (i * 3) + 1]; //second byte is the defending type
+                    typeStrengthToAdd.Effectiveness = (DamageModifier)romData[typeChartByte + (i * 3) + 2]; //third byte is effectiveness X 10. So double damage = 20, half damage = 5.
+                    typeStrengths.Add(typeStrengthToAdd);
+                }
+                else
+                {
+                    break;
+                }
             }
 
             return typeStrengths;
@@ -423,12 +430,15 @@ namespace PokemonROMEditor.Models
 
         private void SaveTypeStrengths(ObservableCollection<TypeStrength> str)
         {
-            for(int i = 0; i < 82; i++)
+            int currentByte = typeChartByte;
+            
+            foreach(var ts in str)
             {
-                romData[typeChartByte + (i * 3)] = (byte)str.ElementAt(i).AttackType;
-                romData[typeChartByte + (i * 3) + 1] = (byte)str.ElementAt(i).DefenseType;
-                romData[typeChartByte + (i * 3) + 2] = (byte)str.ElementAt(i).Effectiveness;
+                romData[currentByte++] = (byte)ts.AttackType;
+                romData[currentByte++] = (byte)ts.DefenseType;
+                romData[currentByte++] = (byte)ts.Effectiveness;
             }
+            romData[currentByte++] = 0xFF; //writing the ending byte manually in case they removed some type strengths.
         }
 
         public ObservableCollection<TM> LoadTMs()

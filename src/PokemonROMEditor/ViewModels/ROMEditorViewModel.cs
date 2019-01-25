@@ -16,13 +16,20 @@ namespace PokemonROMEditor.ViewModels
 
         #region variables
 
-        private ROMConverter romConverter;
-        private string romFile;
+        private ROMConverter romConverter;        
         private int moveByteMax;
         private int trainerByteMax;
         #endregion
 
         #region Data Properties
+
+        private string romFile;
+
+        public string RomFile
+        {
+            get { return romFile; }
+        }
+
         private ObservableCollection<Move> moves;
 
         public ObservableCollection<Move> Moves
@@ -380,7 +387,7 @@ namespace PokemonROMEditor.ViewModels
 
         public bool CanSave()
         {
-            return (ExtraTrainerBytes >= 0 && ExtraMoveBytes >= 0 && DataLoaded);
+            return (ExtraTrainerBytes >= 0 && ExtraMoveBytes >= 0 && DataLoaded && (TypeStrengths.Count <= 82));
         }
 
         #endregion
@@ -554,6 +561,7 @@ namespace PokemonROMEditor.ViewModels
             if (result == true)
             {
                 romFile = ofd.FileName;
+                OnPropertyChanged("RomFile");
                 romConverter.LoadROMDataFromFile(romFile);
                 Moves = romConverter.LoadMoves();
                 Pokemons = romConverter.LoadPokemon();
@@ -579,6 +587,7 @@ namespace PokemonROMEditor.ViewModels
             if (result == true)
             {
                 romFile = ofd.FileName;
+                OnPropertyChanged("RomFile");
                 romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops);
                 DataLoaded = true;
             }

@@ -66,6 +66,7 @@
             <Button Command="{Binding OpenROMFile}" Content="Open" Width="40" HorizontalAlignment="Left"/>
             <Button Command="{Binding SaveROMFileAs}" Content="Save As" Width="60" HorizontalAlignment="Left"/>
             <Button Command="{Binding SaveROMFile}" Content="Save" Width="40" />
+            <TextBlock Text="{Binding RomFile}" Width="auto" Margin="5,0,0,0"/>
         </StackPanel>
         <TabControl Grid.Row="1" Grid.Column="1">
             <TabItem Header="Pokemon" >
