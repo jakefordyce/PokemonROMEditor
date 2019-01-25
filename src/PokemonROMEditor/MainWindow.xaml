@@ -13,6 +13,7 @@
         <BooleanToVisibilityConverter x:Key="boolToVis" />
         <viewmodels:ShowStonesBoolConverter x:Key="showStonesBool" />
         <viewmodels:ShowLevelBoolConverter x:Key="showLevelBool" />
+        <viewmodels:ShowIndividualLevelBoolConverter x:Key="hideLevelBool" />
         <ObjectDataProvider x:Key="typesEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type Type="model:PokeType" />
@@ -433,8 +434,8 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
                                             <Button Content=" X " Command="{Binding DataContext.DeleteTrainerPokemon, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}" />
-                                            <TextBlock Text=" Level: " VerticalAlignment="Center"/>
-                                            <TextBox Text="{Binding Level}" MinWidth="40" TextAlignment="Center"/>
+                                            <TextBlock Text=" Level: " VerticalAlignment="Center" Visibility="{Binding DataContext.SelectedTrainer.AllSameLevel, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource hideLevelBool}}"/>
+                                            <TextBox Text="{Binding Level}" MinWidth="40" TextAlignment="Center" Visibility="{Binding DataContext.SelectedTrainer.AllSameLevel, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource hideLevelBool}}"/>
                                             <ComboBox SelectedIndex="{Binding Path=PokedexID}" ItemsSource="{Binding DataContext.Pokemons, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name"/>
                                         </StackPanel>
                                     </DataTemplate>
