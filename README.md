@@ -12,9 +12,9 @@
 
 ![Moves Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/MovesTab.PNG)
 
-* TMs
+* Items
 
-![TMs Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/TMsTab.PNG)
+![Items Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/ItemsTab.PNG)
 
 * Types
 
