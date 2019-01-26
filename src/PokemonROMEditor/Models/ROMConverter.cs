@@ -17,6 +17,7 @@ namespace PokemonROMEditor.Models
 
         int shopsStartByte = 9282; //The data for the pokemarts inventories starts at byte 0x2442
         int mewStartByte = 16987; // Mew's stats start at byte 0x425B
+        int itemPricesStartByte = 17928; // The prices for items start at byte 0x4608
         int wildEncountersByte = 53471; //The data for wild encounters start at 0xD0DE but the first one is empty so I skip it.
         int wildEncountersEndByte = 54727;
         int tmStartByte = 79731; //The TM info starts at byte 0x13773.
@@ -47,7 +48,8 @@ namespace PokemonROMEditor.Models
         }
 
         public void SaveROMDataToFile(string fileName, ObservableCollection<Move> moves, ObservableCollection<Pokemon> pokemons, ObservableCollection<TypeStrength> str,
-                                        ObservableCollection<TM> tms, ObservableCollection<WildEncounterZone> zones, ObservableCollection<Trainer> trainers, ObservableCollection<Shop> shops)
+                                        ObservableCollection<TM> tms, ObservableCollection<WildEncounterZone> zones, ObservableCollection<Trainer> trainers, ObservableCollection<Shop> shops,
+                                        ObservableCollection<Item> items)
         {            
             // first update the byte array with the data that the user has modified.
             SaveMoves(moves);
@@ -57,6 +59,7 @@ namespace PokemonROMEditor.Models
             SaveWildEncounters(zones);
             SaveTrainers(trainers);
             SaveShops(shops);
+            SaveItems(items);
             // then just write the new byte array to file.
             File.WriteAllBytes(fileName, romData);
         }
@@ -724,6 +727,43 @@ namespace PokemonROMEditor.Models
             }
         }
 
+        public ObservableCollection<Item> LoadItems()
+        {
+            ObservableCollection<Item> items = new ObservableCollection<Item>();
+            Item itemToAdd;
+
+            for(int i = 0; i < 83; i++) // there are 97 items but the last 14 are floors?
+            {
+                itemToAdd = new Item((ItemType)i+1, GetDecPrice(itemPricesStartByte + (i * 3)));
+                items.Add(itemToAdd);
+            }
+
+            return items;
+        }
+
+        private void SaveItems(ObservableCollection<Item> items)
+        {
+            int currentByte = itemPricesStartByte;
+            int firstPriceByte = 0;
+            int secondPriceByte = 0;
+            int thirdPriceByte = 0;
+            int price = 0;
+
+            foreach( var i in items)
+            {
+                price = i.Price;
+                firstPriceByte = DecToHex(price / 10000);
+                price -= (HexToDec(firstPriceByte) * 10000);
+                secondPriceByte = DecToHex(price / 100);
+                price -= (HexToDec(secondPriceByte) * 100);
+                thirdPriceByte = DecToHex(price);
+
+                romData[currentByte++] = (byte)firstPriceByte;
+                romData[currentByte++] = (byte)secondPriceByte;
+                romData[currentByte++] = (byte)thirdPriceByte;
+            }
+        }
+
         public int GetMaxMoveBytes()
         {
             //2068 bytes total. Take out the 39 missingnos at 2 bytes each for total left.
@@ -762,6 +802,39 @@ namespace PokemonROMEditor.Models
             }
             tmBits.CopyTo(tmArray, 0);
             return tmArray;
+        }
+
+        private int GetDecPrice(int currentByte)
+        {
+            int decPrice = 0;
+
+            decPrice += (HexToDec(romData[currentByte]) * 10000);
+            decPrice += (HexToDec(romData[currentByte+1]) * 100);
+            decPrice += (HexToDec(romData[currentByte+2]) * 1);
+
+            return decPrice;
+        }        
+
+        private int DecToHex(int decNum)
+        {
+            int hexsNum = 0;
+            int onesNum = 0;
+
+            hexsNum = decNum / 10;
+            onesNum = decNum % 10;
+
+            return (hexsNum * 16) + onesNum;
+        }
+
+        private int HexToDec(int hexNum)
+        {
+            int tensNum = 0;
+            int onesNum = 0;
+
+            tensNum = hexNum / 16;
+            onesNum = hexNum % 16;
+
+            return (tensNum * 10) + onesNum;
         }
 
         //This is for finding a letter based on the given byte (loading from the ROM)

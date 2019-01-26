@@ -256,6 +256,21 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private ObservableCollection<Item> items;
+
+        public ObservableCollection<Item> Items
+        {
+            get
+            {
+                return items;
+            }
+            set
+            {
+                items = value;
+                OnPropertyChanged();
+            }
+        }
+
         #endregion
 
         #region Behavior Properties
@@ -404,6 +419,7 @@ namespace PokemonROMEditor.ViewModels
             EncounterZones = new ObservableCollection<WildEncounterZone>();
             Trainers = new ObservableCollection<Trainer>();
             Shops = new ObservableCollection<Shop>();
+            Items = new ObservableCollection<Item>();
         }
 
         #region Public Methods        
@@ -572,6 +588,7 @@ namespace PokemonROMEditor.ViewModels
                 Trainers = romConverter.LoadTrainers();
                 trainerByteMax = romConverter.GetMaxTrainerBytes();
                 Shops = romConverter.LoadShops();
+                Items = romConverter.LoadItems();
                 DataLoaded = true;
             }
         }
@@ -588,14 +605,13 @@ namespace PokemonROMEditor.ViewModels
             {
                 romFile = ofd.FileName;
                 OnPropertyChanged("RomFile");
-                romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops);
-                DataLoaded = true;
+                SaveFile();                
             }
         }
 
         private void SaveFile()
         {
-            romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops);
+            romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops, Items);
             DataLoaded = true;
         }
 

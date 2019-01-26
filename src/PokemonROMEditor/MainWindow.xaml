@@ -264,19 +264,43 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
-            <TabItem Header="TMs">
-                <ListView ItemsSource="{Binding AllTMs}" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}" Grid.Row="1" Grid.Column="0">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding TMName}" MinWidth="40" VerticalAlignment="Center"/>
-                                <ComboBox SelectedIndex="{Binding Path=MoveID}" ItemsSource="{Binding DataContext.MoveNames, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name" Width="150"/>
-                                <TextBlock Text=" Price in Thousands: " />
-                                <TextBox Text="{Binding Price}" MinWidth="30"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+            <TabItem Header="Items">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="TMs" Grid.Row="0" Grid.Column="0"/>
+                    <ListView ItemsSource="{Binding AllTMs}" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}" Grid.Row="1" Grid.Column="0">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding TMName}" MinWidth="40" VerticalAlignment="Center"/>
+                                    <ComboBox SelectedIndex="{Binding Path=MoveID}" ItemsSource="{Binding DataContext.MoveNames, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name" Width="150"/>
+                                    <TextBlock Text=" Price in Thousands: " />
+                                    <TextBox Text="{Binding Price}" MinWidth="30"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <TextBlock Text="Items" Grid.Row="0" Grid.Column="2"/>
+                    <ListView ItemsSource="{Binding Items}" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}" Grid.Row="1" Grid.Column="2">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding ItemID}" MinWidth="120" VerticalAlignment="Center"/>
+                                    <TextBlock Text=" Price : " />
+                                    <TextBox Text="{Binding Price}" Width="60"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
             </TabItem>
             <TabItem Header="Types">
                 <Grid Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">

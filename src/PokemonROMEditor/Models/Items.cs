@@ -33,7 +33,14 @@ namespace PokemonROMEditor.Models
         public Item(ItemType item)
         {
             ItemID = item;
+            Price = 0;
+        }
+        public Item(ItemType item, int price)
+        {
+            ItemID = item;
+            Price = price;
         }
         public ItemType ItemID { get; set; }
+        public int Price { get; set; }
     }
 }
