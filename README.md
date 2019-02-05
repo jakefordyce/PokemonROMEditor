@@ -1,7 +1,7 @@
-# PokemonROMEditor
+# Pokemon ROM Editor
 
 ## Currently Supported Games
-* Pokemon RED
+* Pokemon RED (.gb)
 
 ## Features
 * Pokemon stats  
