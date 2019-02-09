@@ -489,16 +489,22 @@
                     </ListView>
                     <Grid Grid.Row="0" Grid.Column="1" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
                         <StackPanel Orientation="Vertical" Visibility="{Binding Path=IsShopSelected, Converter={StaticResource boolToVis}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Shop Items Left: "/>
+                                <TextBlock Text="{Binding ExtraShopItems}" />
+                            </StackPanel>
                             <TextBlock Text="Items"/>
                             <ListView ItemsSource="{Binding SelectedShop.Items}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
+                                            <Button Content=" X " Command="{Binding DataContext.DeleteShopItem, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}" />
                                             <ComboBox SelectedItem="{Binding Path=ItemID}" ItemsSource="{Binding Source={StaticResource itemEnum}}"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
+                            <Button Command="{Binding AddShopItem}" Content="Add Item" />
                         </StackPanel>
                     </Grid>
                 </Grid>

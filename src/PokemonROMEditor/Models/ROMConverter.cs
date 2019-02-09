@@ -34,6 +34,11 @@ namespace PokemonROMEditor.Models
         int pokedexStartByte = 266276; //List of pokedex IDs start at byte 0x41024 and run in Index order, Rhydon through Victreebel.
         int tmPricesStartByte = 507815; //TM prices start at byte 0x7BFA7
         int moveNamesByte = 720896; //The data for move names starts at 0xB0000 bytes into the file which is 720896 in Decimal.
+        
+        //The locations of the pointers for each shop.
+        //The first 0x00 is the bike shop. The script for the bike shop menu doesn't actually look at the bike shop's items.
+        //The second 0x00 is an unused shop. 
+        int[] shopPointerBytes = { 0x1D4EA, 0x74CB6, 0x5C898, 0x00, 0x5C9E4, 0x5692F, 0x560F8, 0x560FA, 0x48359, 0x49070, 0x49072, 0x1DD8B, 0x00, 0x75E81, 0x5D40C, 0x19C85};
 
         public ROMConverter() { }
 
@@ -714,16 +719,32 @@ namespace PokemonROMEditor.Models
 
         private void SaveShops(ObservableCollection<Shop> shops)
         {
+            int firstPointerByte;
+            int secondPointerByte;
+
             int currentByte = shopsStartByte;
             for (int i = 0; i < 16; i++)
-            {
-                currentByte += 2; //Skip the first 2 bytes. The first byte is always 0xFE and the 2nd is the number of items for sale.
+            {                
+                //first update pointers to the new location of the shop's data.
+                //the game stores these pointers along with the pointers to the text data.
+                if(shopPointerBytes[i] != 0x00) //there are 2 pointers that aren't used. We don't need to update them
+                {                    
+                    secondPointerByte = (currentByte) / 256;
+                    firstPointerByte = (currentByte) - (secondPointerByte * 256);
+                    romData[shopPointerBytes[i]] = (byte)firstPointerByte;
+                    romData[shopPointerBytes[i]+1] = (byte)secondPointerByte;
+                }
 
-                foreach(var item in shops.ElementAt(i).Items)
-                {
+                //next update the shop data.
+                //The first byte is always 0xFE and the 2nd is the number of items for sale.
+                romData[currentByte++] = 0xFE;
+                romData[currentByte++] = (byte)shops.ElementAt(i).Items.Count;
+
+                foreach (var item in shops.ElementAt(i).Items)
+                {                    
                     romData[currentByte++] = (byte)item.ItemID;
                 }
-                currentByte++;
+                romData[currentByte++] = 0xFF; //mark end of shop
             }
         }
 
@@ -774,6 +795,11 @@ namespace PokemonROMEditor.Models
         {
 
             return 1941;
+        }
+
+        public int GetMaxShopItems()
+        {
+            return 100;
         }
 
         private ObservableCollection<TMCompatible> GetTMCompatibles(BitArray tmBits)

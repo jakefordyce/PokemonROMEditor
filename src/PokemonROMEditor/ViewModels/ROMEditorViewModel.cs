@@ -19,6 +19,7 @@ namespace PokemonROMEditor.ViewModels
         private ROMConverter romConverter;        
         private int moveByteMax;
         private int trainerByteMax;
+        private int shopItemsMax;
         #endregion
 
         #region Data Properties
@@ -400,6 +401,30 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private int extraShopItems;
+
+        public int ExtraShopItems
+        {
+            get { return extraShopItems; }
+            set
+            {
+                extraShopItems = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool CanAddShopItem()
+        {
+            if (ExtraShopItems > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public bool CanSave()
         {
             return (ExtraTrainerBytes >= 0 && ExtraMoveBytes >= 0 && DataLoaded && (TypeStrengths.Count <= 82));
@@ -562,6 +587,37 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private ICommand addShopItem;
+
+        public ICommand AddShopItem
+        {
+            get
+            {
+                return addShopItem ?? (addShopItem = new RelayCommand(
+                    x =>
+                    {
+                        SelectedShop.Items.Add(new Item(ItemType.ULTRA_BALL));
+                        CountShopItems();
+                    },
+                    x => CanAddShopItem()));
+            }
+        }
+
+        private ICommand deleteShopItem;
+
+        public ICommand DeleteShopItem
+        {
+            get
+            {
+                return deleteShopItem ?? (deleteShopItem = new RelayCommand(
+                    x =>
+                    {
+                        SelectedShop.Items.Remove((Item)x);
+                        CountShopItems();
+                    }));
+            }
+        }
+
         #endregion
 
         #region Private Methods
@@ -578,6 +634,7 @@ namespace PokemonROMEditor.ViewModels
             {
                 romFile = ofd.FileName;
                 OnPropertyChanged("RomFile");
+                //load data from ROM
                 romConverter.LoadROMDataFromFile(romFile);
                 Moves = romConverter.LoadMoves();
                 Pokemons = romConverter.LoadPokemon();
@@ -589,6 +646,12 @@ namespace PokemonROMEditor.ViewModels
                 trainerByteMax = romConverter.GetMaxTrainerBytes();
                 Shops = romConverter.LoadShops();
                 Items = romConverter.LoadItems();
+                shopItemsMax = romConverter.GetMaxShopItems();
+                //Initialize counts
+                CountMoveBytes();
+                CountTrainerBytes();
+                CountShopItems();
+                
                 DataLoaded = true;
             }
         }
@@ -714,6 +777,21 @@ namespace PokemonROMEditor.ViewModels
             }
 
             ExtraTrainerBytes = trainerByteMax - count;
+        }
+
+        private void CountShopItems()
+        {
+            int count = 0;
+
+            foreach(var shop in Shops)
+            {
+                foreach(var item in shop.Items)
+                {
+                    count++;
+                }
+            }
+
+            ExtraShopItems = shopItemsMax - count;
         }
 
         #endregion
