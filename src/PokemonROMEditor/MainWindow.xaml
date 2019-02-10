@@ -112,6 +112,8 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
                         <TextBlock Text="Name:" Grid.Column="0" Grid.Row="0"/>
                         <TextBlock Text="Pokedex ID:" Grid.Column="0" Grid.Row="1"/>
@@ -121,8 +123,8 @@
                         <TextBlock Text="Base Speed:" Grid.Column="0" Grid.Row="5"/>
                         <TextBlock Text="Base Special:" Grid.Column="0" Grid.Row="6"/>
                         <TextBlock Text="Base Stats Total: " Grid.Column="0" Grid.Row="7"/>
-                        <TextBlock Text="Type1:" Grid.Column="0" Grid.Row="9"/>
-                        <TextBlock Text="Type2:" Grid.Column="0" Grid.Row="10"/>
+                        <TextBlock Text="Catch Rate: " Grid.Column="0" Grid.Row="8"/>
+                        <TextBlock Text="Exp Yield: " Grid.Column="0" Grid.Row="9"/>
                         <TextBlock Text="{Binding SelectedPokemon.Name}" Grid.Column="1" Grid.Row="0"/>
                         <TextBlock Text="{Binding SelectedPokemon.PokedexID}" Grid.Column="1" Grid.Row="1"/>
                         <TextBox Grid.Column="1" Grid.Row="2">
@@ -171,18 +173,38 @@
                             </TextBox.Text>
                         </TextBox>
                         <TextBlock Text="{Binding SelectedPokemon.StatTotal}" Grid.Column="1" Grid.Row="7"/>
-                        <TextBlock Text="Growth Rate:" Grid.Column="0" Grid.Row="8"/>
-                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.GrowthRate}" ItemsSource="{Binding Source={StaticResource growthEnum}}" Grid.Column="1" Grid.Row="8"/>
-                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.Type1}" ItemsSource="{Binding Source={StaticResource typesEnum}}" Grid.Column="1" Grid.Row="9"/>
-                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.Type2}" ItemsSource="{Binding Source={StaticResource typesEnum}}" Grid.Column="1" Grid.Row="10"/>
-                        <TextBlock Text="Starting Moves" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="11"/>
-                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move1}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="12" Grid.ColumnSpan="2"/>
-                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move2}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="13" Grid.ColumnSpan="2"/>
-                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move3}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="14" Grid.ColumnSpan="2"/>
-                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move4}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="15" Grid.ColumnSpan="2"/>
+                        <TextBox Grid.Column="1" Grid.Row="8">
+                            <TextBox.Text>
+                                <Binding Path="SelectedPokemon.CatchRate">
+                                    <Binding.ValidationRules>
+                                        <model:ByteRangeRule/>
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                        <TextBox Grid.Column="1" Grid.Row="9">
+                            <TextBox.Text>
+                                <Binding Path="SelectedPokemon.ExpYield">
+                                    <Binding.ValidationRules>
+                                        <model:ByteRangeRule/>
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                        <TextBlock Text="Growth Rate:" Grid.Column="0" Grid.Row="10"/>
+                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.GrowthRate}" ItemsSource="{Binding Source={StaticResource growthEnum}}" Grid.Column="1" Grid.Row="10"/>
+                        <TextBlock Text="Type1:" Grid.Column="0" Grid.Row="11"/>
+                        <TextBlock Text="Type2:" Grid.Column="0" Grid.Row="12"/>
+                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.Type1}" ItemsSource="{Binding Source={StaticResource typesEnum}}" Grid.Column="1" Grid.Row="11"/>
+                        <ComboBox SelectedItem="{Binding Path=SelectedPokemon.Type2}" ItemsSource="{Binding Source={StaticResource typesEnum}}" Grid.Column="1" Grid.Row="12"/>
+                        <TextBlock Text="Starting Moves" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="13"/>
+                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move1}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="14" Grid.ColumnSpan="2"/>
+                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move2}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="15" Grid.ColumnSpan="2"/>
+                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move3}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="16" Grid.ColumnSpan="2"/>
+                        <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move4}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="17" Grid.ColumnSpan="2"/>
 
-                        <TextBlock Text="Evolution" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="16"/>
-                        <ListView ItemsSource="{Binding SelectedPokemon.Evolutions}" Grid.Column="0" Grid.Row="17" Grid.ColumnSpan="2">
+                        <TextBlock Text="Evolution" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="18"/>
+                        <ListView ItemsSource="{Binding SelectedPokemon.Evolutions}" Grid.Column="0" Grid.Row="19" Grid.ColumnSpan="2">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" >
