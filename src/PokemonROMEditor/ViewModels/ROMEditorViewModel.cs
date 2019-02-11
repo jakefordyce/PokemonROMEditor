@@ -31,6 +31,23 @@ namespace PokemonROMEditor.ViewModels
             get { return romFile; }
         }
 
+        public string ToggleButtonText
+        {
+            get
+            {
+                if (showFullPokemonView)
+                {
+                    return "Toggle Grid View";
+                }
+                else
+                {
+                    return "Toggle Full View";
+                }
+                
+            }
+            
+        }
+
         private ObservableCollection<Move> moves;
 
         public ObservableCollection<Move> Moves
@@ -81,14 +98,16 @@ namespace PokemonROMEditor.ViewModels
             set
             {
                 pokemons = value;
+                PokeNames = new ObservableCollection<PokemonView>();
                 foreach (var p in pokemons)
                 {
+                    PokeNames.Add(new PokemonView(p.PokedexID, p.Name));                    
                     foreach (var e in p.Evolutions)
                     {
                         e.EvolveTypeChanged += UpdateDoesPokemonEvolve;
                     }
                 }
-                OnPropertyChanged();
+                OnPropertyChanged();                
             }
         }
 
@@ -121,6 +140,21 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private ObservableCollection<PokemonView> pokeNames;
+
+        public ObservableCollection<PokemonView> PokeNames
+        {
+            get
+            {
+                return pokeNames;
+            }
+            set
+            {
+                pokeNames = value;
+                OnPropertyChanged();
+            }
+        }
+
         private ObservableCollection<TM> allTMs;
 
         public ObservableCollection<TM> AllTMs
@@ -135,7 +169,6 @@ namespace PokemonROMEditor.ViewModels
                 OnPropertyChanged();
             }
         }
-
 
         private ObservableCollection<TMCompatible> pokemonTMs;
 
@@ -430,11 +463,32 @@ namespace PokemonROMEditor.ViewModels
             return (ExtraTrainerBytes >= 0 && ExtraMoveBytes >= 0 && DataLoaded && (TypeStrengths.Count <= 82));
         }
 
+        private bool showFullPokemonView;
+
+        public bool ShowFullPokemonView
+        {
+            get
+            {
+                return (dataLoaded && showFullPokemonView);               
+            }
+            
+        }
+
+        public bool ShowGridPokemonView
+        {
+            get
+            {
+                return (dataLoaded && !showFullPokemonView);
+            }
+            
+        }
+
         #endregion
 
         public ROMEditorViewModel()
         {
             DataLoaded = false;
+            showFullPokemonView = true;
             Moves = new ObservableCollection<Move>();
             Pokemons = new ObservableCollection<Pokemon>();
             romConverter = new ROMConverter();
@@ -618,6 +672,23 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private ICommand togglePokemonView;
+
+        public ICommand TogglePokemonView
+        {
+            get
+            {
+                return togglePokemonView ?? (togglePokemonView = new RelayCommand(
+                    x =>
+                    {
+                        showFullPokemonView = !showFullPokemonView;
+                        OnPropertyChanged("ToggleButtonText");
+                        OnPropertyChanged("ShowFullPokemonView");
+                        OnPropertyChanged("ShowGridPokemonView");
+                    }));
+            }
+        }
+
         #endregion
 
         #region Private Methods
@@ -653,6 +724,8 @@ namespace PokemonROMEditor.ViewModels
                 CountShopItems();
                 
                 DataLoaded = true;
+                OnPropertyChanged("ShowFullPokemonView");
+                OnPropertyChanged("ShowGridPokemonView");
             }
         }
 

@@ -1,23 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PokemonROMEditor.Models
 {
-    public class Pokemon
-    {
-        
+    public class Pokemon: INotifyPropertyChanged
+    {        
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public string Name { get; set; }
         public int PokedexID { get; set; }
-        public int HP { get; set; }
-        public int Attack { get; set; }
-        public int Defense { get; set; }
-        public int Speed { get; set; }
-        public int Special { get; set; }
+        private int hp;
+        public int HP {
+            get { return hp; }
+            set { hp = value; OnPropertyChanged(); OnPropertyChanged("StatTotal"); }
+        }
+        private int attack;
+        public int Attack
+        {
+            get { return attack; }
+            set { attack = value; OnPropertyChanged(); OnPropertyChanged("StatTotal"); }
+        }
+        private int defense;
+        public int Defense
+        {
+            get { return defense; }
+            set { defense = value; OnPropertyChanged(); OnPropertyChanged("StatTotal"); }
+        }
+        private int speed;
+        public int Speed
+        {
+            get { return speed; }
+            set { speed = value; OnPropertyChanged(); OnPropertyChanged("StatTotal"); }
+        }
+        private int special;
+        public int Special
+        {
+            get { return special; }
+            set { special = value; OnPropertyChanged(); OnPropertyChanged("StatTotal"); }
+        }
         public int StatTotal
         {
             get
@@ -36,9 +62,12 @@ namespace PokemonROMEditor.Models
         public GrowthType GrowthRate { get; set; }
         public ObservableCollection<Evolution> Evolutions { get; set; }
         public ObservableCollection<LearnedMove> LearnedMoves { get; set; }
-        public ObservableCollection<TMCompatible> TMs { get; set; }
+        public ObservableCollection<TMCompatible> TMs { get; set; }        
 
-        
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     public class Evolution
@@ -110,5 +139,16 @@ namespace PokemonROMEditor.Models
         }
         public int Level { get; set; }
         public int PokedexID { get; set; }
+    }
+
+    public class PokemonView
+    {
+        public PokemonView(int id, string name)
+        {
+            PokemonID = id;
+            Name = name;
+        }
+        public int PokemonID { get; set; }
+        public string Name { get; set; }
     }
 }
