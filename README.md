@@ -7,6 +7,8 @@
 * Pokemon stats  
   
 ![Pokemon Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/PokemonTab.PNG)
+
+![Pokemon Tab Grid](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/PokemonTabGrid.PNG)
   
 * Moves
 
