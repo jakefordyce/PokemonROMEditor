@@ -40,6 +40,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -58,6 +59,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\Map.cs" />
     <Compile Include="Models\Move.cs" />
     <Compile Include="Models\Pokemon.cs" />
     <Compile Include="Models\ROMConverter.cs" />
@@ -112,6 +114,28 @@
   <ItemGroup>
     <Resource Include="pokeball_resized.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="SourceImages\cemetery.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="SourceImages\cavern.png" />
+    <Resource Include="SourceImages\club.png" />
+    <Resource Include="SourceImages\facility.png" />
+    <Resource Include="SourceImages\forest.png" />
+    <Resource Include="SourceImages\gate.png" />
+    <Resource Include="SourceImages\gym.png" />
+    <Resource Include="SourceImages\house.png" />
+    <Resource Include="SourceImages\interior.png" />
+    <Resource Include="SourceImages\lab.png" />
+    <Resource Include="SourceImages\lobby.png" />
+    <Resource Include="SourceImages\mansion.png" />
+    <Resource Include="SourceImages\overworld.png" />
+    <Resource Include="SourceImages\plateau.png" />
+    <Resource Include="SourceImages\pokecenter.png" />
+    <Resource Include="SourceImages\reds_house.png" />
+    <Resource Include="SourceImages\ship.png" />
+    <Resource Include="SourceImages\ship_port.png" />
+    <Resource Include="SourceImages\underground.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

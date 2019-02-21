@@ -559,6 +559,63 @@
                     </Grid>
                 </Grid>
             </TabItem>
+            <TabItem Header="Maps">
+                <!--<Image Source="{Binding MapImage}" />-->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ListView Grid.Row="0" Grid.Column="0" ItemsSource="{Binding Maps}" SelectedItem="{Binding SelectedMap}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding MapName}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <ListView Grid.Column="1" Grid.Row="0" ItemsSource="{Binding Tiles}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SelectTile, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}">
+                                    <Image Source="{Binding}"/>
+                                </Button>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Image Grid.Column="2" Grid.Row="0" Source="{Binding SelectedTileImage}" Width="64" Height="64" />
+                    <ScrollViewer Grid.Column="3" Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <Grid >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <ItemsControl  ItemsSource="{Binding SelectedMapTiles}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="{Binding SelectedMap.Width}" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.UpdateMapTile, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" Width="32" Height="32" >
+                                            <Image Source="{Binding TileImage}" />
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </ScrollViewer>
+                    
+                </Grid>
+                
+            </TabItem>
         </TabControl>
 
     </Grid>

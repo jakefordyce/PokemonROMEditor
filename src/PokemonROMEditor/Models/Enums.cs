@@ -283,4 +283,32 @@ namespace PokemonROMEditor.Models
         Fast = 4,
         Slow = 5
     }
+
+    public enum TileSet
+    {
+        Overworld = 0,
+        Reds_House_1 = 1,
+        Mart = 2,
+        Forest = 3,
+        Reds_House_2 = 4,
+        Dojo = 5,
+        Pokecenter = 6,
+        Gym = 7,
+        House = 8,
+        Forest_Gate = 9,
+        Museum = 10,
+        Underground = 11,
+        Gate = 12,
+        Ship = 13,
+        Ship_Port = 14,
+        Cemetery = 15,
+        Interior = 16,
+        Cavern = 17,
+        Lobby = 18,
+        Mansion = 19,
+        Lab = 20,
+        Club = 21,
+        Facility = 22,
+        Plateau = 23
+    }
 }

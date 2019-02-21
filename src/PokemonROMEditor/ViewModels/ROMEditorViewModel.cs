@@ -4,10 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 
 namespace PokemonROMEditor.ViewModels
 {
@@ -304,6 +308,113 @@ namespace PokemonROMEditor.ViewModels
                 OnPropertyChanged();
             }
         }
+        
+        private ObservableCollection<BitmapSource> tiles;
+
+        public ObservableCollection<BitmapSource> Tiles
+        {
+            get
+            {
+                return tiles;
+            }
+            set
+            {
+                tiles = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int selectedTileID;
+
+        public int SelectedTileID
+        {
+            get { return selectedTileID; }
+            set
+            {
+                selectedTileID = value;
+                OnPropertyChanged();
+                OnPropertyChanged("SelectedTileImage");
+            }
+        }
+
+        public BitmapSource SelectedTileImage
+        {
+            get
+            {
+                if(Tiles.Count > 0)
+                {
+                    return tiles.ElementAt(selectedTileID);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+       
+        //private int[] selectedMapByteValues;
+
+        //public int[] SelectedMapByteValues
+        //{
+        //    get { return selectedMapByteValues; }
+        //    set
+        //    {
+        //        selectedMapByteValues = value;                
+        //        OnPropertyChanged();                
+        //    }
+        //}
+
+        private ObservableCollection<MapTile> selectedMapTiles;
+
+        public ObservableCollection<MapTile> SelectedMapTiles
+        {
+            get { return selectedMapTiles; }
+            set
+            {
+                selectedMapTiles = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private ObservableCollection<BlockSet> blockSets;
+
+        public ObservableCollection<BlockSet> BlockSets
+        {
+            get { return blockSets; }
+            set { blockSets = value; OnPropertyChanged(); }
+        }
+
+        private ObservableCollection<Map> maps;
+
+        public ObservableCollection<Map> Maps
+        {
+            get
+            {
+                return maps;
+            }
+            set
+            {
+                maps = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Map selectedMap;
+
+        public Map SelectedMap
+        {
+            get
+            {
+                return selectedMap;
+            }
+            set
+            {
+                selectedMap = value;
+                LoadTileset();
+                LoadSelectedMapImages();
+                OnPropertyChanged();
+            }
+        }
 
         #endregion
 
@@ -499,6 +610,10 @@ namespace PokemonROMEditor.ViewModels
             Trainers = new ObservableCollection<Trainer>();
             Shops = new ObservableCollection<Shop>();
             Items = new ObservableCollection<Item>();
+            Tiles = new ObservableCollection<BitmapSource>();
+            SelectedMapTiles = new ObservableCollection<MapTile>();
+            BlockSets = new ObservableCollection<BlockSet>();
+            Maps = new ObservableCollection<Map>();
         }
 
         #region Public Methods        
@@ -689,6 +804,36 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private ICommand selectTile;
+
+        public ICommand SelectTile
+        {
+            get
+            {
+                return selectTile ?? (selectTile = new RelayCommand(
+                    x =>
+                    {
+                        SelectedTileID = Tiles.IndexOf((BitmapSource)x);
+                    }));
+            }
+        }
+
+        private ICommand updateMapTile;
+
+        public ICommand UpdateMapTile
+        {
+            get
+            {
+                return updateMapTile ?? (updateMapTile = new RelayCommand(
+                    x =>
+                    {
+                        var clickedTile = (MapTile)x;
+                        SelectedMap.MapBlockValues[clickedTile.TileID] = SelectedTileID;
+                        LoadSelectedMapImages();
+                    }));
+            }
+        }
+
         #endregion
 
         #region Private Methods
@@ -717,12 +862,18 @@ namespace PokemonROMEditor.ViewModels
                 trainerByteMax = romConverter.GetMaxTrainerBytes();
                 Shops = romConverter.LoadShops();
                 Items = romConverter.LoadItems();
-                shopItemsMax = romConverter.GetMaxShopItems();
+                shopItemsMax = romConverter.GetMaxShopItems();                
+                BlockSets = romConverter.LoadBlockSets();
+                Maps = romConverter.LoadMaps();
+
                 //Initialize counts
                 CountMoveBytes();
                 CountTrainerBytes();
                 CountShopItems();
-                
+
+                //LoadTileset();
+                //LoadSelectedMapImages();
+
                 DataLoaded = true;
                 OnPropertyChanged("ShowFullPokemonView");
                 OnPropertyChanged("ShowGridPokemonView");
@@ -865,6 +1016,83 @@ namespace PokemonROMEditor.ViewModels
             }
 
             ExtraShopItems = shopItemsMax - count;
+        }
+
+        private void LoadTileset()
+        {
+            BlockSet blockset = BlockSets.ElementAt((int)selectedMap.TileSetID);
+            Tiles = new ObservableCollection<BitmapSource>();
+            // The block definitions take 1 image and chop it up into 8x8 squares and then assemble those squares into usable 32x32 blocks.
+
+            // sourceBitmap is our 1 image that is being chopped up and made into the blocks that are used to create the tilesets.
+            Bitmap sourceBitmap = new Bitmap(blockset.SourceFile);
+
+            // createdBitMap is one of the 32x32 usable blocks that we have created from our source image.
+            Bitmap createdBitmap;
+
+            // chunkOfBitmap will be our 8x8 building blocks that are cut from the source image.
+            Bitmap chunkOfBitmap;
+
+            int numOfTiles = blockset.BlockDefinitions.Count() / 16;
+            int xpos;
+            int ypos;
+            int currentByte;
+
+
+            for (int i = 0; i < numOfTiles; i++)
+            {
+                createdBitmap = new Bitmap(64, 64); //the actual images are 32x32 but that's hard to see so I stretched it out to 64x64
+                using (Graphics g = Graphics.FromImage(createdBitmap))
+                {
+                    for (int y = 0; y < 4; y++)
+                    {
+                        for (int x = 0; x < 4; x++)
+                        {
+                            currentByte = (i * 16) + (y * 4) + x;
+
+                            //these are used to mark where we start our crop from the source image.
+                            xpos = (blockset.BlockDefinitions[currentByte] % 16);
+                            ypos = (blockset.BlockDefinitions[currentByte] / 16);
+                            
+                            if(ypos > 7)
+                            {
+                                ypos = 0;
+                                xpos = 0;
+                            }
+
+                            xpos *= 8;
+                            ypos *= 8;
+
+                            // take the proper chunk from the source image...
+                            chunkOfBitmap = sourceBitmap.Clone(new Rectangle(xpos, ypos, 8, 8), sourceBitmap.PixelFormat);
+
+                            // and add it to our final image. The 8x8 block is being stretched to 16x16 to make it easier to see.
+                            g.DrawImage(chunkOfBitmap, x * 16, y * 16, 16, 16);
+                        }
+                    }
+                }
+
+                Tiles.Add(Bitmap2BitmapSource(createdBitmap));
+            }
+        }
+
+        private BitmapSource Bitmap2BitmapSource(Bitmap bitmap)
+        {
+            BitmapSource i = Imaging.CreateBitmapSourceFromHBitmap(
+                           bitmap.GetHbitmap(),
+                           IntPtr.Zero,
+                           Int32Rect.Empty,
+                           BitmapSizeOptions.FromEmptyOptions());            
+            return i;
+        }
+
+        private void LoadSelectedMapImages()
+        {
+            SelectedMapTiles = new ObservableCollection<MapTile>();
+            for(int i = 0; i < SelectedMap.MapBlockValues.Count(); i++)
+            {
+                SelectedMapTiles.Add(new MapTile(i, Tiles.ElementAt(SelectedMap.MapBlockValues[i])));
+            }
         }
 
         #endregion

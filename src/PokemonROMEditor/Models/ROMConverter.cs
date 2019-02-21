@@ -15,9 +15,12 @@ namespace PokemonROMEditor.Models
         private Dictionary<int, int> PokedexIDs;
         private Dictionary<int, int> IndexIDs;
 
+        int mapHeaderPointersByte = 430; // 0x1AE 
         int shopsStartByte = 9282; //The data for the pokemarts inventories starts at byte 0x2442
         int mewStartByte = 16987; // Mew's stats start at byte 0x425B
         int itemPricesStartByte = 17928; // The prices for items start at byte 0x4608
+        int mapBanksByte = 49725; // 0xC23D 
+        int tilesetHeadersByte = 51134; //0xC7BE
         int wildEncountersByte = 53471; //The data for wild encounters start at 0xD0DE but the first one is empty so I skip it.
         int wildEncountersEndByte = 54727;
         int tmStartByte = 79731; //The TM info starts at byte 0x13773.
@@ -34,7 +37,9 @@ namespace PokemonROMEditor.Models
         int pokedexStartByte = 266276; //List of pokedex IDs start at byte 0x41024 and run in Index order, Rhydon through Victreebel.
         int tmPricesStartByte = 507815; //TM prices start at byte 0x7BFA7
         int moveNamesByte = 720896; //The data for move names starts at 0xB0000 bytes into the file which is 720896 in Decimal.
-        
+
+        string imageFolder = "..\\..\\SourceImages\\";
+
         //The locations of the pointers for each shop.
         //The first 0x00 is the bike shop. The script for the bike shop menu doesn't actually look at the bike shop's items.
         //The second 0x00 is an unused shop. 
@@ -785,6 +790,86 @@ namespace PokemonROMEditor.Models
             }
         }
 
+        public ObservableCollection<BlockSet> LoadBlockSets()
+        {
+            var blockSets = new ObservableCollection<BlockSet>();
+            BlockSet bs;
+            int currentHeaderByte;
+            int currentBank;
+            int currentBlocksetByte;
+            int blocksetPointer1;
+            int blocksetPointer2;
+
+            for(int i = 0; i < blocksetSizes.Count(); i++)
+            {
+                currentHeaderByte = tilesetHeadersByte + (i * 12); // each tileset header is 12 bytes
+                currentBank = (romData[currentHeaderByte] - 1) * 0x4000; //the first byte is the map. each map is 0x4000 bytes. We subtract 1 because the first bank starts at 0.
+                blocksetPointer1 = romData[currentHeaderByte + 1]; // the pointer to the block data is stored in 2 bytes, smaller byte first
+                blocksetPointer2 = romData[currentHeaderByte + 2] * 256;
+                currentBlocksetByte = currentBank + blocksetPointer2 + blocksetPointer1; // add the bank byte to the pointer bytes and we get the start of the blocks
+
+                bs = new BlockSet();
+                bs.SourceFile = imageFolder + blocksetPngNames[i]; //this is the name of the png file that is used to create the block images.
+                bs.BlockDefinitions = new int[blocksetSizes[i]]; //blocksetSizes is a list of how many bytes are used for each blockset
+                for(int j = 0; j < blocksetSizes[i]; j++)
+                {
+                    //from the starting point we calculated above we copy each byte
+                    bs.BlockDefinitions[j] = romData[currentBlocksetByte + j];
+                }
+                blockSets.Add(bs);
+                
+            }           
+
+            return blockSets;
+        }
+
+        public ObservableCollection<Map> LoadMaps()
+        {
+            var maps = new ObservableCollection<Map>();
+            Map newMap;
+            int currentHeaderByte;
+            int currentBank;
+            int headerPointer1;
+            int headerPointer2;
+            int currentBlocksByte;
+            int blocksPointer1;
+            int blocksPointer2;
+
+            for (int i = 0; i < 247; i++)
+            {
+                // need to calculate the location of the map header.
+                currentBank = (romData[mapBanksByte + i] - 1) * 0x4000; //this bank value is used for the header location as well as the location of the map's blocks
+                headerPointer1 = romData[mapHeaderPointersByte + (i * 2)]; //again the pointer is stored as 2 bytes, smaller first.
+                headerPointer2 = romData[mapHeaderPointersByte + (i * 2) + 1] * 256;
+                currentHeaderByte = currentBank + headerPointer1 + headerPointer2;
+
+                if(romData[currentHeaderByte] < 24)
+                {
+                    // read some info about the map from the header
+                    newMap = new Map($"testing {i}", (TileSet)romData[currentHeaderByte]);
+                    newMap.Height = romData[currentHeaderByte + 1];
+                    newMap.Width = romData[currentHeaderByte + 2];
+                    newMap.MapBlockValues = new int[newMap.Height * newMap.Width];
+
+                    // uses the header info to get the location of the map's blocks.
+                    blocksPointer1 = romData[currentHeaderByte + 3];
+                    blocksPointer2 = romData[currentHeaderByte + 4] * 256;
+                    currentBlocksByte = currentBank + blocksPointer1 + blocksPointer2;
+
+                    // read the map's blocks
+                    for (int m = 0; m < newMap.Height * newMap.Width; m++)
+                    {
+                        newMap.MapBlockValues[m] = romData[currentBlocksByte + m];
+                    }
+                    maps.Add(newMap);
+                }
+                
+            }
+
+
+            return maps;
+        }
+
         public int GetMaxMoveBytes()
         {
             //2068 bytes total. Take out the 39 missingnos at 2 bytes each for total left.
@@ -1067,5 +1152,8 @@ namespace PokemonROMEditor.Models
 
         int[] trainerCounts = { 13, 14, 18, 8, 9, 24, 7, 12, 14, 15, 9, 3, 11, 15, 9, 7, 15, 4, 2, 8, 6, 17, 9, 9, 3, 13, 3, 41, 10, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5, 12, 3, 1, 24, 1, 1};
         int[] unusedTrainers = {12, 24, 58, 65, 98, 99, 100, 134, 135, 136, 143, 186, 198, 214, 222, 234, 235, 258, 259, 260, 261, 298, 321, 323, 324, 325, 331, 333, 334, 335, 347, 365, 366, 367, 368, 371, 375, 377, 379 };
+        int[] blocksetSizes = { 2048, 304, 592, 2048, 304, 1856, 592, 1856, 560, 1872, 1872, 272, 1872, 992, 368, 1760, 928, 2048, 1264, 1152, 928, 576, 2048, 1200};
+        string[] blocksetPngNames = { "overworld.png", "reds_house.png", "pokecenter.png", "forest.png", "reds_house.png", "gym.png", "pokecenter.png", "gym.png", "house.png", "gate.png", "gate.png",
+            "underground.png", "gate.png", "ship.png", "ship_port.png", "cemetery.png", "interior.png", "cavern.png", "lobby.png", "mansion.png", "lab.png", "club.png", "facility.png", "plateau.png"};
     }
 }
