@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
@@ -23,7 +24,7 @@ namespace PokemonROMEditor.ViewModels
         private ROMConverter romConverter;        
         private int moveByteMax;
         private int trainerByteMax;
-        private int shopItemsMax;
+        private int shopItemsMax;        
         #endregion
 
         #region Data Properties
@@ -409,7 +410,7 @@ namespace PokemonROMEditor.ViewModels
             }
             set
             {
-                selectedMap = value;
+                selectedMap = value;               
                 LoadTileset();
                 LoadSelectedMapImages();
                 OnPropertyChanged();
@@ -871,8 +872,7 @@ namespace PokemonROMEditor.ViewModels
                 CountTrainerBytes();
                 CountShopItems();
 
-                //LoadTileset();
-                //LoadSelectedMapImages();
+                //LoadTileset();                
 
                 DataLoaded = true;
                 OnPropertyChanged("ShowFullPokemonView");
@@ -898,7 +898,7 @@ namespace PokemonROMEditor.ViewModels
 
         private void SaveFile()
         {
-            romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops, Items);
+            romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops, Items, Maps);
             DataLoaded = true;
         }
 
@@ -1020,8 +1020,9 @@ namespace PokemonROMEditor.ViewModels
 
         private void LoadTileset()
         {
-            BlockSet blockset = BlockSets.ElementAt((int)selectedMap.TileSetID);
-            Tiles = new ObservableCollection<BitmapSource>();
+            BlockSet blockset = BlockSets.ElementAt((int)selectedMap.TileSetID);            
+            Tiles.Clear();
+            
             // The block definitions take 1 image and chop it up into 8x8 squares and then assemble those squares into usable 32x32 blocks.
 
             // sourceBitmap is our 1 image that is being chopped up and made into the blocks that are used to create the tilesets.
@@ -1068,27 +1069,35 @@ namespace PokemonROMEditor.ViewModels
 
                             // and add it to our final image. The 8x8 block is being stretched to 16x16 to make it easier to see.
                             g.DrawImage(chunkOfBitmap, x * 16, y * 16, 16, 16);
+                            chunkOfBitmap.Dispose();
                         }
                     }
-                }
-
+                }                
                 Tiles.Add(Bitmap2BitmapSource(createdBitmap));
+                createdBitmap.Dispose();
             }
+            sourceBitmap.Dispose();
         }
 
         private BitmapSource Bitmap2BitmapSource(Bitmap bitmap)
         {
+            var hbitmap = bitmap.GetHbitmap();
             BitmapSource i = Imaging.CreateBitmapSourceFromHBitmap(
-                           bitmap.GetHbitmap(),
-                           IntPtr.Zero,
-                           Int32Rect.Empty,
-                           BitmapSizeOptions.FromEmptyOptions());            
+                               hbitmap,
+                               IntPtr.Zero,
+                               Int32Rect.Empty,
+                               BitmapSizeOptions.FromEmptyOptions());
+            DeleteObject(hbitmap);
             return i;
         }
 
+        //Need this to free up memory after using GetHbitmap()
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+
         private void LoadSelectedMapImages()
         {
-            SelectedMapTiles = new ObservableCollection<MapTile>();
+            SelectedMapTiles = new ObservableCollection<MapTile>();            
             for(int i = 0; i < SelectedMap.MapBlockValues.Count(); i++)
             {
                 SelectedMapTiles.Add(new MapTile(i, Tiles.ElementAt(SelectedMap.MapBlockValues[i])));

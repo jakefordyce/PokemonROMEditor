@@ -59,7 +59,7 @@ namespace PokemonROMEditor.Models
 
         public void SaveROMDataToFile(string fileName, ObservableCollection<Move> moves, ObservableCollection<Pokemon> pokemons, ObservableCollection<TypeStrength> str,
                                         ObservableCollection<TM> tms, ObservableCollection<WildEncounterZone> zones, ObservableCollection<Trainer> trainers, ObservableCollection<Shop> shops,
-                                        ObservableCollection<Item> items)
+                                        ObservableCollection<Item> items, ObservableCollection<Map> maps)
         {            
             // first update the byte array with the data that the user has modified.
             SaveMoves(moves);
@@ -70,6 +70,7 @@ namespace PokemonROMEditor.Models
             SaveTrainers(trainers);
             SaveShops(shops);
             SaveItems(items);
+            SaveMaps(maps);
             // then just write the new byte array to file.
             File.WriteAllBytes(fileName, romData);
         }
@@ -621,7 +622,7 @@ namespace PokemonROMEditor.Models
                 }
                 currentByte++;
                 //trainerToAdd.TrainerName = TrainerNames[trainerNameTracker];
-                trainerName = TrainerNames[trainerNameTracker];
+                trainerName = $"{TrainerNames[trainerNameTracker]} {numOfTrainersWithName +1}";
                 if (unusedTrainers.Contains(trainers.Count))
                 {
                     trainerName += " (unused)";
@@ -835,7 +836,7 @@ namespace PokemonROMEditor.Models
             int blocksPointer1;
             int blocksPointer2;
 
-            for (int i = 0; i < 247; i++)
+            for (int i = 0; i < 247; i++) //There are somehow 247 maps in the game.
             {
                 // need to calculate the location of the map header.
                 currentBank = (romData[mapBanksByte + i] - 1) * 0x4000; //this bank value is used for the header location as well as the location of the map's blocks
@@ -843,10 +844,10 @@ namespace PokemonROMEditor.Models
                 headerPointer2 = romData[mapHeaderPointersByte + (i * 2) + 1] * 256;
                 currentHeaderByte = currentBank + headerPointer1 + headerPointer2;
 
-                if(romData[currentHeaderByte] < 24)
+                if(romData[currentHeaderByte] < 24) // Make sure the tileset id is correct. 11 maps have bad data.
                 {
                     // read some info about the map from the header
-                    newMap = new Map($"testing {i}", (TileSet)romData[currentHeaderByte]);
+                    newMap = new Map($"map {i}", (TileSet)romData[currentHeaderByte]);
                     newMap.Height = romData[currentHeaderByte + 1];
                     newMap.Width = romData[currentHeaderByte + 2];
                     newMap.MapBlockValues = new int[newMap.Height * newMap.Width];
@@ -868,6 +869,43 @@ namespace PokemonROMEditor.Models
 
 
             return maps;
+        }
+
+        private void SaveMaps(ObservableCollection<Map> maps)
+        {
+            int currentHeaderByte;
+            int currentBank;
+            int headerPointer1;
+            int headerPointer2;
+            int currentBlocksByte;
+            int blocksPointer1;
+            int blocksPointer2;
+            int currentMap = 0; //using this to keep track of which map index to use since we skipped loading 11 of the 247 maps.
+
+            for (int i = 0; i < 247; i++) //There are somehow 247 maps in the game.
+            {
+                // need to calculate the location of the map header.
+                currentBank = (romData[mapBanksByte + i] - 1) * 0x4000; //this bank value is used for the header location as well as the location of the map's blocks
+                headerPointer1 = romData[mapHeaderPointersByte + (i * 2)]; //again the pointer is stored as 2 bytes, smaller first.
+                headerPointer2 = romData[mapHeaderPointersByte + (i * 2) + 1] * 256;
+                currentHeaderByte = currentBank + headerPointer1 + headerPointer2;
+
+                if (romData[currentHeaderByte] < 24) // Make sure the tileset id is correct. 11 maps have bad data.
+                {
+                    // uses the header info to get the location of the map's blocks.
+                    blocksPointer1 = romData[currentHeaderByte + 3];
+                    blocksPointer2 = romData[currentHeaderByte + 4] * 256;
+                    currentBlocksByte = currentBank + blocksPointer1 + blocksPointer2;
+
+                    // save the map's blocks
+                    for (int m = 0; m < maps.ElementAt(currentMap).MapBlockValues.Count(); m++)
+                    {
+                        romData[currentBlocksByte + m] = (byte)maps.ElementAt(currentMap).MapBlockValues[m];
+                    }
+                    currentMap++;
+                }
+
+            }
         }
 
         public int GetMaxMoveBytes()

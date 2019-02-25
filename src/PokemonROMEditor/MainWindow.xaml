@@ -560,7 +560,6 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Maps">
-                <!--<Image Source="{Binding MapImage}" />-->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
@@ -612,9 +611,7 @@
                             </ItemsControl>
                         </Grid>
                     </ScrollViewer>
-                    
                 </Grid>
-                
             </TabItem>
         </TabControl>
 
