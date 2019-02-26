@@ -28,6 +28,7 @@ namespace PokemonROMEditor.Models
         int pointerBase = 212992; //this is the value that is added to the pointers to get the location of evolutions/moves and trainer data
         int movesStartingByte = 229376; //The move data starts 0x38000 bytes into the file which is 229376 in Decimal.
         int pokemonStartByte = 230366; //Pokemon data starts at byte 0x383DE. It goes in Pokedex order, Bulbasaur through Mewtwo.
+        int trainerNamesByte = 236031; //The names of the trainer groups start at byte 0x399FF
         int trainerPointersByte = 236859; // The pointers to the trainer groups start at byte 0x39D3B
         int trainerStartByte = 236953; //The data for trainers starts at 0x39D99
         int trainerEndByte = 238893; //The last byte for trainers is 0x3A52D
@@ -592,9 +593,9 @@ namespace PokemonROMEditor.Models
         {
             var trainers = new ObservableCollection<Trainer>();
             int currentByte = trainerStartByte;
-            int trainerNameTracker = 0; // tells which name to pull from the dictionary
-            int numOfTrainersWithName = 0;            
-            string trainerName = "";
+            int trainerGroupTracker = 0; // tells which name to pull from the dictionary
+            int numOfTrainersInGroup = 0;
+            //string trainerName = "";
             Trainer trainerToAdd;
 
             while (currentByte < trainerEndByte)
@@ -621,19 +622,23 @@ namespace PokemonROMEditor.Models
                     }
                 }
                 currentByte++;
-                //trainerToAdd.TrainerName = TrainerNames[trainerNameTracker];
-                trainerName = $"{TrainerNames[trainerNameTracker]} {numOfTrainersWithName +1}";
-                if (unusedTrainers.Contains(trainers.Count))
-                {
-                    trainerName += " (unused)";
-                }
-                trainerToAdd.TrainerName = trainerName;
 
-                numOfTrainersWithName++;
-                if(numOfTrainersWithName == trainerCounts[trainerNameTracker])
-                {
-                    trainerNameTracker++;
-                    numOfTrainersWithName = 0;
+                //trainerToAdd.TrainerName = TrainerNames[trainerNameTracker];
+                //trainerName = $"{TrainerNames[trainerNameTracker]} {numOfTrainersWithName +1}";
+                //if (unusedTrainers.Contains(trainers.Count))
+                //{
+                //    trainerName += " (unused)";
+                //}
+                //trainerToAdd.TrainerName = trainerName;
+
+                trainerToAdd.GroupNum = trainerGroupTracker + 201;
+                trainerToAdd.TrainerNum = numOfTrainersInGroup + 1;
+
+                numOfTrainersInGroup++;
+                while(numOfTrainersInGroup == trainerCounts[trainerGroupTracker] && trainerGroupTracker < 46)
+                {                    
+                    trainerGroupTracker++;
+                    numOfTrainersInGroup = 0;                    
                 }
                 trainers.Add(trainerToAdd);
             }
@@ -698,6 +703,32 @@ namespace PokemonROMEditor.Models
                 }
             }
 
+        }
+
+        public ObservableCollection<TrainerGroup> LoadTrainerGroups()
+        {
+            ObservableCollection<TrainerGroup> groups = new ObservableCollection<TrainerGroup>();
+            int trainerNum = 201;
+            int currentByte = trainerNamesByte;
+            TrainerGroup newGroup;
+            string groupName;
+            int currentLetter = 0;
+
+            for(int i = 0; i < 47; i++) // There are 47 trainer groups
+            {
+                groupName = "";
+                while(romData[currentByte] != 0x50)
+                {
+                    currentLetter = romData[currentByte];
+                    groupName += Letters[romData[currentByte++]];
+                }
+                currentByte++;
+
+                newGroup = new TrainerGroup(groupName, trainerNum + i);
+                groups.Add(newGroup);
+            }
+
+            return groups;
         }
 
         public ObservableCollection<Shop> LoadShops()
@@ -810,6 +841,7 @@ namespace PokemonROMEditor.Models
                 currentBlocksetByte = currentBank + blocksetPointer2 + blocksetPointer1; // add the bank byte to the pointer bytes and we get the start of the blocks
 
                 bs = new BlockSet();
+                bs.Tiles = new ObservableCollection<System.Drawing.Bitmap>();
                 bs.SourceFile = imageFolder + blocksetPngNames[i]; //this is the name of the png file that is used to create the block images.
                 bs.BlockDefinitions = new int[blocksetSizes[i]]; //blocksetSizes is a list of how many bytes are used for each blockset
                 for(int j = 0; j < blocksetSizes[i]; j++)
@@ -824,6 +856,8 @@ namespace PokemonROMEditor.Models
             return blockSets;
         }
 
+
+
         public ObservableCollection<Map> LoadMaps()
         {
             var maps = new ObservableCollection<Map>();
@@ -835,6 +869,13 @@ namespace PokemonROMEditor.Models
             int currentBlocksByte;
             int blocksPointer1;
             int blocksPointer2;
+            int numOfConnections;
+            int objectsPointer1;
+            int objectsPointer2;
+            int currentObjectsByte;
+            MapObject newMapObject;
+            int numOfObjects;
+            int numOfExtraBytes;
 
             for (int i = 0; i < 247; i++) //There are somehow 247 maps in the game.
             {
@@ -862,6 +903,79 @@ namespace PokemonROMEditor.Models
                     {
                         newMap.MapBlockValues[m] = romData[currentBlocksByte + m];
                     }
+
+                    numOfConnections = 0;
+                    // find number of connections
+                    if ((romData[currentHeaderByte + 9] & 1) != 0)
+                    {
+                        numOfConnections++;
+                    }
+                    if ((romData[currentHeaderByte + 9] & 2) != 0)
+                    {
+                        numOfConnections++;
+                    }
+                    if ((romData[currentHeaderByte + 9] & 4) != 0)
+                    {
+                        numOfConnections++;
+                    }
+                    if ((romData[currentHeaderByte + 9] & 8) != 0)
+                    {
+                        numOfConnections++;
+                    }
+                    //each connection is 11 bytes. There can be 0 to 4 connections in a map. The pointer to the object data is after the connections.
+                    objectsPointer1 = romData[currentHeaderByte + 10 + (numOfConnections * 11)];
+                    objectsPointer2 = romData[currentHeaderByte + 11 + (numOfConnections * 11)] * 256;
+                    currentObjectsByte = currentBank + objectsPointer1 + objectsPointer2;
+
+                    currentObjectsByte++; // the first byte is the border block. We are skipping that for now.
+                    numOfExtraBytes = romData[currentObjectsByte] * 4 + 1;
+                    currentObjectsByte += numOfExtraBytes; // warps data. Skipping for now
+                    numOfExtraBytes = romData[currentObjectsByte] * 3 + 1;
+                    currentObjectsByte += numOfExtraBytes; // Signs data. Skipping for now
+
+                    newMap.MapObjects = new ObservableCollection<MapObject>();
+                    numOfObjects = romData[currentObjectsByte++];
+
+                    for (int objs = 0; objs < numOfObjects; objs++)
+                    {
+                        newMapObject = new MapObject();
+                        currentObjectsByte++; // the first byte is the sprite
+                        newMapObject.YPosition = romData[currentObjectsByte++] - 4;
+                        newMapObject.XPosition = romData[currentObjectsByte++] - 4;
+                        newMapObject.Movement = (MapObjectMovementType)romData[currentObjectsByte++];
+                        newMapObject.Facing = (MapObjectFacing)romData[currentObjectsByte++];
+
+                        //the next byte is the textstringID. This is how you determine what type of object you are dealing with.
+                        if (romData[currentObjectsByte] > 0x80) // item
+                        {
+                            newMapObject.ObjectType = MapObjectType.Item;
+                            currentObjectsByte++; //move past the textstringID
+                            newMapObject.Item = (ItemType)romData[currentObjectsByte++];
+                        }
+                        else if(romData[currentObjectsByte] > 0x40) // trainer or pokemon
+                        {
+                            currentObjectsByte++; //move past the textstringID
+                            if(romData[currentObjectsByte] > 200) //ID over 200 means trainer ID
+                            {
+                                newMapObject.ObjectType = MapObjectType.Trainer;
+                                newMapObject.TrainerGroupNum = romData[currentObjectsByte++];
+                                newMapObject.TrainerNum = romData[currentObjectsByte++];
+                            }
+                            else // ID under 200 means pokedex ID
+                            {
+                                newMapObject.ObjectType = MapObjectType.Pokemon;
+                                newMapObject.PokemonObj.PokedexID = romData[currentObjectsByte++];
+                                newMapObject.PokemonObj.Level = romData[currentObjectsByte++];
+                            }
+                        }
+                        else
+                        {
+                            newMapObject.ObjectType = MapObjectType.Person;
+                            currentObjectsByte++; //move past the textstringID
+                        }
+                        newMap.MapObjects.Add(newMapObject);
+                    }
+
                     maps.Add(newMap);
                 }
                 
@@ -1016,11 +1130,22 @@ namespace PokemonROMEditor.Models
             { 151, "X" },
             { 152, "Y"},
             { 153, "Z" },
+            { 186, "E" },
             { 227, "-" },
             { 232, "." },
             { 224, "'" },
             { 239, "M" },
-            { 245, "F" }
+            { 245, "F" },
+            { 246, "0" },
+            { 247, "1" },
+            { 248, "2" },
+            { 249, "3" },
+            { 250, "4" },
+            { 251, "5" },
+            { 252, "6" },
+            { 253, "7" },
+            { 254, "8" },
+            { 255, "9" }
         };
 
         //This is for when you need the byte value for a letter (saving to the ROM)
@@ -1188,8 +1313,8 @@ namespace PokemonROMEditor.Models
             {15, "Indigo Plateau" }
         };
 
-        int[] trainerCounts = { 13, 14, 18, 8, 9, 24, 7, 12, 14, 15, 9, 3, 11, 15, 9, 7, 15, 4, 2, 8, 6, 17, 9, 9, 3, 13, 3, 41, 10, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5, 12, 3, 1, 24, 1, 1};
-        int[] unusedTrainers = {12, 24, 58, 65, 98, 99, 100, 134, 135, 136, 143, 186, 198, 214, 222, 234, 235, 258, 259, 260, 261, 298, 321, 323, 324, 325, 331, 333, 334, 335, 347, 365, 366, 367, 368, 371, 375, 377, 379 };
+        int[] trainerCounts = { 13, 14, 18, 8, 9, 24, 7, 12, 14, 15, 9, 3, 0, 11, 15, 9, 7, 15, 4, 2, 8, 6, 17, 9, 9, 3, 0, 13, 3, 41, 10, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5, 12, 3, 1, 24, 1, 1};
+        //int[] unusedTrainers = {12, 24, 58, 65, 98, 99, 100, 134, 135, 136, 143, 186, 198, 214, 222, 234, 235, 258, 259, 260, 261, 298, 321, 323, 324, 325, 331, 333, 334, 335, 347, 365, 366, 367, 368, 371, 375, 377, 379 };
         int[] blocksetSizes = { 2048, 304, 592, 2048, 304, 1856, 592, 1856, 560, 1872, 1872, 272, 1872, 992, 368, 1760, 928, 2048, 1264, 1152, 928, 576, 2048, 1200};
         string[] blocksetPngNames = { "overworld.png", "reds_house.png", "pokecenter.png", "forest.png", "reds_house.png", "gym.png", "pokecenter.png", "gym.png", "house.png", "gate.png", "gate.png",
             "underground.png", "gate.png", "ship.png", "ship_port.png", "cemetery.png", "interior.png", "cavern.png", "lobby.png", "mansion.png", "lab.png", "club.png", "facility.png", "plateau.png"};

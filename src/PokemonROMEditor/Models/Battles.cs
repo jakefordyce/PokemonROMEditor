@@ -26,9 +26,22 @@ namespace PokemonROMEditor.Models
     public class Trainer
     {
         public string TrainerName { get; set; }
+        public int GroupNum { get; set; }
+        public int TrainerNum { get; set; }
         public bool AllSameLevel { get; set; }
         public int PartyLevel { get; set; }
         public ObservableCollection<EnemyPokemon> Pokemons { get; set; }
+    }
+
+    public class TrainerGroup
+    {
+        public TrainerGroup(string name, int num)
+        {
+            GroupName = name;
+            GroupNum = num;
+        }
+        public string GroupName { get; }
+        public int GroupNum { get; }
     }
 
 }

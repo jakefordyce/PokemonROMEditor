@@ -69,4 +69,17 @@ namespace PokemonROMEditor.ViewModels
             return false;
         }
     }
+
+    public class MapObjectTypeToStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return ((MapObjectType)value).ToString();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

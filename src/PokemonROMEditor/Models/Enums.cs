@@ -311,4 +311,32 @@ namespace PokemonROMEditor.Models
         Facility = 22,
         Plateau = 23
     }
+
+    public enum MapObjectType
+    {
+        Person = 0,
+        Trainer = 1,
+        Pokemon = 2,
+        Item = 3
+    }
+
+    public enum MapObjectMovementType
+    {
+        Walk = 254,
+        Stay = 255
+    }
+
+    public enum MapObjectFacing
+    {
+        Zero = 0,
+        One = 1,
+        Two = 2,
+        Three = 3,
+        Down = 208,
+        Up = 209,
+        Left = 210,
+        Right = 211,
+        None = 255
+    }    
+
 }

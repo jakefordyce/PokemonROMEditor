@@ -254,6 +254,21 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private ObservableCollection<TrainerGroup> trainerGroups;
+
+        public ObservableCollection<TrainerGroup> TrainerGroups
+        {
+            get
+            {
+                return trainerGroups;
+            }
+            set
+            {
+                trainerGroups = value;
+                OnPropertyChanged();
+            }
+        }
+
         private Trainer selectedTrainer;
 
         public Trainer SelectedTrainer
@@ -310,6 +325,7 @@ namespace PokemonROMEditor.ViewModels
             }
         }
         
+        // these are the images from the current blockset
         private ObservableCollection<BitmapSource> tiles;
 
         public ObservableCollection<BitmapSource> Tiles
@@ -325,6 +341,7 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        // these are for selecting a tile to update the map
         private int selectedTileID;
 
         public int SelectedTileID
@@ -352,19 +369,8 @@ namespace PokemonROMEditor.ViewModels
                 }
             }
         }
-       
-        //private int[] selectedMapByteValues;
 
-        //public int[] SelectedMapByteValues
-        //{
-        //    get { return selectedMapByteValues; }
-        //    set
-        //    {
-        //        selectedMapByteValues = value;                
-        //        OnPropertyChanged();                
-        //    }
-        //}
-
+        // these are the images for displaying the selected map
         private ObservableCollection<MapTile> selectedMapTiles;
 
         public ObservableCollection<MapTile> SelectedMapTiles
@@ -377,6 +383,7 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        // these are the definitions of the blocks
         private ObservableCollection<BlockSet> blockSets;
 
         public ObservableCollection<BlockSet> BlockSets
@@ -411,7 +418,8 @@ namespace PokemonROMEditor.ViewModels
             set
             {
                 selectedMap = value;               
-                LoadTileset();
+                //LoadTileset();
+                LoadSelectedMapTilesImages();
                 LoadSelectedMapImages();
                 OnPropertyChanged();
             }
@@ -615,6 +623,7 @@ namespace PokemonROMEditor.ViewModels
             SelectedMapTiles = new ObservableCollection<MapTile>();
             BlockSets = new ObservableCollection<BlockSet>();
             Maps = new ObservableCollection<Map>();
+            TrainerGroups = new ObservableCollection<TrainerGroup>();
         }
 
         #region Public Methods        
@@ -859,6 +868,7 @@ namespace PokemonROMEditor.ViewModels
                 moveByteMax = romConverter.GetMaxMoveBytes();
                 TypeStrengths = romConverter.LoadTypeStrengths();
                 EncounterZones = romConverter.LoadWildEncounters();
+                TrainerGroups = romConverter.LoadTrainerGroups();
                 Trainers = romConverter.LoadTrainers();
                 trainerByteMax = romConverter.GetMaxTrainerBytes();
                 Shops = romConverter.LoadShops();
@@ -872,7 +882,9 @@ namespace PokemonROMEditor.ViewModels
                 CountTrainerBytes();
                 CountShopItems();
 
-                //LoadTileset();                
+                //LoadTileset();
+                LoadBlocksetTiles();
+                UpdateTrainerNames();
 
                 DataLoaded = true;
                 OnPropertyChanged("ShowFullPokemonView");
@@ -1018,6 +1030,81 @@ namespace PokemonROMEditor.ViewModels
             ExtraShopItems = shopItemsMax - count;
         }
 
+        private void LoadBlocksetTiles()
+        {
+            // sourceBitmap is our 1 image that is being chopped up and made into the blocks that are used to create the tilesets.
+            Bitmap sourceBitmap;
+
+            // createdBitMap is one of the 32x32 usable blocks that we have created from our source image.
+            Bitmap createdBitmap;
+
+            // chunkOfBitmap will be our 8x8 building blocks that are cut from the source image.
+            Bitmap chunkOfBitmap;
+
+            int numOfTiles;
+            int xpos;
+            int ypos;
+            int currentByte;
+
+            foreach (var b in BlockSets)
+            {
+                b.Tiles.Clear();
+                
+                sourceBitmap = new Bitmap(b.SourceFile);                
+
+                numOfTiles = b.BlockDefinitions.Count() / 16;
+
+                for (int i = 0; i < numOfTiles; i++)
+                {
+                    createdBitmap = new Bitmap(64, 64); //the actual images are 32x32 but that's hard to see so I stretched it out to 64x64
+                    using (Graphics g = Graphics.FromImage(createdBitmap))
+                    {
+                        for (int y = 0; y < 4; y++)
+                        {
+                            for (int x = 0; x < 4; x++)
+                            {
+                                currentByte = (i * 16) + (y * 4) + x;
+
+                                //these are used to mark where we start our crop from the source image.
+                                xpos = (b.BlockDefinitions[currentByte] % 16);
+                                ypos = (b.BlockDefinitions[currentByte] / 16);
+
+                                if (ypos > 7)
+                                {
+                                    ypos = 0;
+                                    xpos = 0;
+                                }
+
+                                xpos *= 8;
+                                ypos *= 8;
+
+                                // take the proper chunk from the source image...
+                                chunkOfBitmap = sourceBitmap.Clone(new Rectangle(xpos, ypos, 8, 8), sourceBitmap.PixelFormat);
+
+                                // and add it to our final image. The 8x8 block is being stretched to 16x16 to make it easier to see.
+                                g.DrawImage(chunkOfBitmap, x * 16, y * 16, 16, 16);
+                                chunkOfBitmap.Dispose();
+                            }
+                        }
+                    }
+                    b.Tiles.Add(createdBitmap);
+                    //createdBitmap.Dispose();
+                }
+                sourceBitmap.Dispose();
+
+            }
+        }
+
+        private void LoadSelectedMapTilesImages()
+        {
+            Tiles.Clear();
+            foreach(var t in BlockSets.ElementAt((int)selectedMap.TileSetID).Tiles)
+            {
+                Tiles.Add(Bitmap2BitmapSource(t));
+            }
+        }
+
+        /*
         private void LoadTileset()
         {
             BlockSet blockset = BlockSets.ElementAt((int)selectedMap.TileSetID);            
@@ -1078,6 +1165,7 @@ namespace PokemonROMEditor.ViewModels
             }
             sourceBitmap.Dispose();
         }
+        //*/
 
         private BitmapSource Bitmap2BitmapSource(Bitmap bitmap)
         {
@@ -1102,6 +1190,17 @@ namespace PokemonROMEditor.ViewModels
             {
                 SelectedMapTiles.Add(new MapTile(i, Tiles.ElementAt(SelectedMap.MapBlockValues[i])));
             }
+        }
+
+        private void UpdateTrainerNames()
+        {
+            foreach ( var t in Trainers)
+            {
+                t.TrainerName = (from g in TrainerGroups
+                                 where t.GroupNum == g.GroupNum
+                                 select g.GroupName).First() + " " + t.TrainerNum;
+            }
+            OnPropertyChanged("Trainers");
         }
 
         #endregion
