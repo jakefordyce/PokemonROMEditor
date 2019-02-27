@@ -15,6 +15,7 @@
         <viewmodels:ShowLevelBoolConverter x:Key="showLevelBool" />
         <viewmodels:ShowIndividualLevelBoolConverter x:Key="hideLevelBool" />
         <viewmodels:MapObjectTypeToStringConverter x:Key="mapObjectToString" />
+        <viewmodels:ShowMapObjectItemBoolConverter x:Key="mapObjectItemBool" />
         <ObjectDataProvider x:Key="typesEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type Type="model:PokeType" />
@@ -603,6 +604,13 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+                    <!--<ListView Grid.Column="1" Grid.Row="0" ItemsSource="{Binding SpriteImages}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>-->
                     <Image Grid.Column="2" Grid.Row="0" Source="{Binding SelectedTileImage}" Width="64" Height="64" />
                     <ScrollViewer Grid.Column="3" Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                         <Grid >
@@ -634,10 +642,12 @@
                                 <StackPanel Orientation="Horizontal">
                                     <!-- saving for when we are able to update object type <ComboBox SelectedItem="{Binding Path=ObjectType}" ItemsSource="{Binding Source={StaticResource mapObjectTypeEnum}}"/> -->
                                     <Label Content="{Binding Path=ObjectType, Converter={StaticResource mapObjectToString}}"/>
+                                    <ComboBox SelectedIndex="{Binding Path=SpriteID}" ItemsSource="{Binding DataContext.Sprites, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="SpriteName"/>
                                     <Label Content="{Binding YPosition}"/>
                                     <Label Content="{Binding XPosition}"/>
                                     <ComboBox SelectedItem="{Binding Path=Movement}" ItemsSource="{Binding Source={StaticResource mapObjectMovementTypeEnum}}"/>
                                     <ComboBox SelectedItem="{Binding Path=Facing}" ItemsSource="{Binding Source={StaticResource mapObjectFacingEnum}}"/>
+                                    <ComboBox SelectedItem="{Binding Path=Item}" ItemsSource="{Binding Source={StaticResource itemEnum}}" Visibility="{Binding Path=ObjectType, Converter={StaticResource mapObjectItemBool}}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>

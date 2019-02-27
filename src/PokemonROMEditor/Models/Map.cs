@@ -54,6 +54,7 @@ namespace PokemonROMEditor.Models
             TrainerGroupNum = 201;
             TrainerNum = 1;
         }
+        public int SpriteID { get; set; }
         public MapObjectType ObjectType { get; set; }
         public int YPosition { get; set; }
         public int XPosition { get; set; }
@@ -65,5 +66,11 @@ namespace PokemonROMEditor.Models
         public int TrainerNum { get; set; }
     }
 
+    public class MapObjectSprite
+    {
+        public string SpriteName { get; set; }
+        public string FileName { get; set; }
+        public Bitmap SpriteBitmap { get; set; }
+    }
 
 }

@@ -24,7 +24,8 @@ namespace PokemonROMEditor.ViewModels
         private ROMConverter romConverter;        
         private int moveByteMax;
         private int trainerByteMax;
-        private int shopItemsMax;        
+        private int shopItemsMax;
+        private string[] spriteFileNames;
         #endregion
 
         #region Data Properties
@@ -425,6 +426,36 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private ObservableCollection<MapObjectSprite> sprites;
+
+        public ObservableCollection<MapObjectSprite> Sprites
+        {
+            get
+            {
+                return sprites;
+            }
+            set
+            {
+                sprites = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private ObservableCollection<BitmapSource> spriteImages;
+
+        public ObservableCollection<BitmapSource> SpriteImages
+        {
+            get
+            {
+                return spriteImages;
+            }
+            set
+            {
+                spriteImages = value;
+                OnPropertyChanged();
+            }
+        }
+
         #endregion
 
         #region Behavior Properties
@@ -624,6 +655,8 @@ namespace PokemonROMEditor.ViewModels
             BlockSets = new ObservableCollection<BlockSet>();
             Maps = new ObservableCollection<Map>();
             TrainerGroups = new ObservableCollection<TrainerGroup>();
+            Sprites = new ObservableCollection<MapObjectSprite>();
+            SpriteImages = new ObservableCollection<BitmapSource>();
         }
 
         #region Public Methods        
@@ -876,6 +909,7 @@ namespace PokemonROMEditor.ViewModels
                 shopItemsMax = romConverter.GetMaxShopItems();                
                 BlockSets = romConverter.LoadBlockSets();
                 Maps = romConverter.LoadMaps();
+                Sprites = romConverter.LoadSprites();
 
                 //Initialize counts
                 CountMoveBytes();
@@ -884,7 +918,10 @@ namespace PokemonROMEditor.ViewModels
 
                 //LoadTileset();
                 LoadBlocksetTiles();
+                LoadSpriteBitmaps();
+                LoadSpriteImages();
                 UpdateTrainerNames();
+
 
                 DataLoaded = true;
                 OnPropertyChanged("ShowFullPokemonView");
@@ -1050,13 +1087,13 @@ namespace PokemonROMEditor.ViewModels
             {
                 b.Tiles.Clear();
                 
-                sourceBitmap = new Bitmap(b.SourceFile);                
+                sourceBitmap = new Bitmap(b.SourceFile);
 
                 numOfTiles = b.BlockDefinitions.Count() / 16;
 
                 for (int i = 0; i < numOfTiles; i++)
                 {
-                    createdBitmap = new Bitmap(64, 64); //the actual images are 32x32 but that's hard to see so I stretched it out to 64x64
+                    createdBitmap = new Bitmap(32, 32); //the actual images are 32x32 but that's hard to see so I stretched it out to 64x64
                     using (Graphics g = Graphics.FromImage(createdBitmap))
                     {
                         for (int y = 0; y < 4; y++)
@@ -1082,7 +1119,7 @@ namespace PokemonROMEditor.ViewModels
                                 chunkOfBitmap = sourceBitmap.Clone(new Rectangle(xpos, ypos, 8, 8), sourceBitmap.PixelFormat);
 
                                 // and add it to our final image. The 8x8 block is being stretched to 16x16 to make it easier to see.
-                                g.DrawImage(chunkOfBitmap, x * 16, y * 16, 16, 16);
+                                g.DrawImage(chunkOfBitmap, x * 8, y * 8, 8, 8);
                                 chunkOfBitmap.Dispose();
                             }
                         }
@@ -1095,6 +1132,39 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private void LoadSpriteBitmaps()
+        {
+            Bitmap sourceBitmap;
+            Bitmap createdBitmap;
+            Bitmap chunkOfBitmap;
+
+            foreach (var s in Sprites)
+            {
+                sourceBitmap = new Bitmap(s.FileName);
+
+                createdBitmap = new Bitmap(16, 16);
+
+                using(Graphics g = Graphics.FromImage(createdBitmap))
+                {
+                    chunkOfBitmap = sourceBitmap.Clone(new Rectangle(0, 0, 16, 16), sourceBitmap.PixelFormat);
+
+                    g.DrawImage(chunkOfBitmap, 0, 0, 16, 16);
+                    //chunkOfBitmap.Dispose();
+                }
+                s.SpriteBitmap = createdBitmap;
+                //sourceBitmap.Dispose();
+            }
+        }
+
+        private void LoadSpriteImages()
+        {
+            SpriteImages.Clear();
+            foreach(var s in Sprites)
+            {
+                SpriteImages.Add(Bitmap2BitmapSource(s.SpriteBitmap));
+            }
+        }
+
         private void LoadSelectedMapTilesImages()
         {
             Tiles.Clear();
@@ -1102,70 +1172,7 @@ namespace PokemonROMEditor.ViewModels
             {
                 Tiles.Add(Bitmap2BitmapSource(t));
             }
-        }
-
-        /*
-        private void LoadTileset()
-        {
-            BlockSet blockset = BlockSets.ElementAt((int)selectedMap.TileSetID);            
-            Tiles.Clear();
-            
-            // The block definitions take 1 image and chop it up into 8x8 squares and then assemble those squares into usable 32x32 blocks.
-
-            // sourceBitmap is our 1 image that is being chopped up and made into the blocks that are used to create the tilesets.
-            Bitmap sourceBitmap = new Bitmap(blockset.SourceFile);
-
-            // createdBitMap is one of the 32x32 usable blocks that we have created from our source image.
-            Bitmap createdBitmap;
-
-            // chunkOfBitmap will be our 8x8 building blocks that are cut from the source image.
-            Bitmap chunkOfBitmap;
-
-            int numOfTiles = blockset.BlockDefinitions.Count() / 16;
-            int xpos;
-            int ypos;
-            int currentByte;
-
-
-            for (int i = 0; i < numOfTiles; i++)
-            {
-                createdBitmap = new Bitmap(64, 64); //the actual images are 32x32 but that's hard to see so I stretched it out to 64x64
-                using (Graphics g = Graphics.FromImage(createdBitmap))
-                {
-                    for (int y = 0; y < 4; y++)
-                    {
-                        for (int x = 0; x < 4; x++)
-                        {
-                            currentByte = (i * 16) + (y * 4) + x;
-
-                            //these are used to mark where we start our crop from the source image.
-                            xpos = (blockset.BlockDefinitions[currentByte] % 16);
-                            ypos = (blockset.BlockDefinitions[currentByte] / 16);
-                            
-                            if(ypos > 7)
-                            {
-                                ypos = 0;
-                                xpos = 0;
-                            }
-
-                            xpos *= 8;
-                            ypos *= 8;
-
-                            // take the proper chunk from the source image...
-                            chunkOfBitmap = sourceBitmap.Clone(new Rectangle(xpos, ypos, 8, 8), sourceBitmap.PixelFormat);
-
-                            // and add it to our final image. The 8x8 block is being stretched to 16x16 to make it easier to see.
-                            g.DrawImage(chunkOfBitmap, x * 16, y * 16, 16, 16);
-                            chunkOfBitmap.Dispose();
-                        }
-                    }
-                }                
-                Tiles.Add(Bitmap2BitmapSource(createdBitmap));
-                createdBitmap.Dispose();
-            }
-            sourceBitmap.Dispose();
-        }
-        //*/
+        }        
 
         private BitmapSource Bitmap2BitmapSource(Bitmap bitmap)
         {
@@ -1185,11 +1192,45 @@ namespace PokemonROMEditor.ViewModels
 
         private void LoadSelectedMapImages()
         {
-            SelectedMapTiles = new ObservableCollection<MapTile>();            
-            for(int i = 0; i < SelectedMap.MapBlockValues.Count(); i++)
+            SelectedMapTiles = new ObservableCollection<MapTile>();
+
+            Bitmap createdBitmap;
+
+            Bitmap sourceBitmap;
+
+            Bitmap chunkOfBitmap;
+
+            for (int i = 0; i < SelectedMap.MapBlockValues.Count(); i++)
             {
-                SelectedMapTiles.Add(new MapTile(i, Tiles.ElementAt(SelectedMap.MapBlockValues[i])));
+                sourceBitmap = BlockSets.ElementAt((int)selectedMap.TileSetID).Tiles.ElementAt(SelectedMap.MapBlockValues[i]);
+
+                createdBitmap = new Bitmap(32, 32);
+
+                using(Graphics g = Graphics.FromImage(createdBitmap))
+                {
+                    g.DrawImage(sourceBitmap, 0, 0);
+                    foreach (var ob in selectedMap.MapObjects)
+                    {
+                        if (i == MatchesBlock(ob.XPosition, ob.YPosition, selectedMap.Width))
+                        {
+                            chunkOfBitmap = Sprites.ElementAt(ob.SpriteID).SpriteBitmap.Clone(new Rectangle(0, 0, 16, 16), Sprites.ElementAt(ob.SpriteID).SpriteBitmap.PixelFormat);
+                            int xpos = (ob.XPosition % 2) * 16;
+                            int ypos = (ob.YPosition % 2) * 16;                            
+                            g.DrawImage(chunkOfBitmap, xpos, ypos, 16, 16);
+                        }
+                    }
+                    // was using these for testing trying to figure out why I couldn't see any sprites.
+                    //chunkOfBitmap = Sprites.ElementAt(2).SpriteBitmap.Clone(new Rectangle(0, 0, 16, 16), Sprites.ElementAt(2).SpriteBitmap.PixelFormat);
+                    //g.DrawImage(chunkOfBitmap, 0, 0, 16, 16);
+                }
+
+                SelectedMapTiles.Add(new MapTile(i, Bitmap2BitmapSource(createdBitmap)));
             }
+        }
+
+        private int MatchesBlock(int x, int y, int width)
+        {
+            return ((y / 2 * width) + x / 2);
         }
 
         private void UpdateTrainerNames()

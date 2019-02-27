@@ -856,7 +856,20 @@ namespace PokemonROMEditor.Models
             return blockSets;
         }
 
+        public ObservableCollection<MapObjectSprite> LoadSprites()
+        {
+            ObservableCollection<MapObjectSprite> sprites = new ObservableCollection<MapObjectSprite>();
+            
+            for(int i = 0; i < spritePngNames.Count(); i++)
+            {
+                MapObjectSprite newSprite = new MapObjectSprite();
+                newSprite.SpriteName = spritePngNames[i];
+                newSprite.FileName = imageFolder + spritePngNames[i] + ".png";
+                sprites.Add(newSprite);
+            }
 
+            return sprites;
+        }
 
         public ObservableCollection<Map> LoadMaps()
         {
@@ -877,7 +890,7 @@ namespace PokemonROMEditor.Models
             int numOfObjects;
             int numOfExtraBytes;
 
-            for (int i = 0; i < 247; i++) //There are somehow 247 maps in the game.
+            for (int i = 0; i < 248; i++) //There are somehow 248 maps in the game.
             {
                 // need to calculate the location of the map header.
                 currentBank = (romData[mapBanksByte + i] - 1) * 0x4000; //this bank value is used for the header location as well as the location of the map's blocks
@@ -939,7 +952,7 @@ namespace PokemonROMEditor.Models
                     for (int objs = 0; objs < numOfObjects; objs++)
                     {
                         newMapObject = new MapObject();
-                        currentObjectsByte++; // the first byte is the sprite
+                        newMapObject.SpriteID = romData[currentObjectsByte++] - 1; // -1 because it will be referencing the index of a collection that is 0 based where the sprites in the game are 1 based.
                         newMapObject.YPosition = romData[currentObjectsByte++] - 4;
                         newMapObject.XPosition = romData[currentObjectsByte++] - 4;
                         newMapObject.Movement = (MapObjectMovementType)romData[currentObjectsByte++];
@@ -996,7 +1009,7 @@ namespace PokemonROMEditor.Models
             int blocksPointer2;
             int currentMap = 0; //using this to keep track of which map index to use since we skipped loading 11 of the 247 maps.
 
-            for (int i = 0; i < 247; i++) //There are somehow 247 maps in the game.
+            for (int i = 0; i < 248; i++) //There are somehow 248 maps in the game.
             {
                 // need to calculate the location of the map header.
                 currentBank = (romData[mapBanksByte + i] - 1) * 0x4000; //this bank value is used for the header location as well as the location of the map's blocks
@@ -1318,5 +1331,12 @@ namespace PokemonROMEditor.Models
         int[] blocksetSizes = { 2048, 304, 592, 2048, 304, 1856, 592, 1856, 560, 1872, 1872, 272, 1872, 992, 368, 1760, 928, 2048, 1264, 1152, 928, 576, 2048, 1200};
         string[] blocksetPngNames = { "overworld.png", "reds_house.png", "pokecenter.png", "forest.png", "reds_house.png", "gym.png", "pokecenter.png", "gym.png", "house.png", "gate.png", "gate.png",
             "underground.png", "gate.png", "ship.png", "ship_port.png", "cemetery.png", "interior.png", "cavern.png", "lobby.png", "mansion.png", "lab.png", "club.png", "facility.png", "plateau.png"};
+
+        string[] spritePngNames = {"red", "blue", "oak", "bug_catcher", "slowbro", "lass", "black_hair_boy_1", "little_girl", "bird", "fat_bald_guy", "gambler",
+            "black_hair_boy_2", "girl", "hiker", "foulard_woman", "gentleman", "daisy", "biker", "sailor", "cook", "bike_shop_guy", "mr_fuji", "giovanni",
+            "rocket", "medium", "waiter", "erika", "mom_geisha", "brunette_girl", "lance","oak_aide","oak_aide","rocker","swimmer","white_player","gym_helper","old_person",
+            "mart_guy","fisher","old_medium_woman","nurse","cable_club_woman","mr_masterball","lapras_giver","warden","ss_captain","fisher2","blackbelt","guard",
+            "guard", "mom","balding_guy","young_boy","gameboy_kid","gameboy_kid","clefairy","agatha","bruno","lorelei","seel","ball","omanyte","boulder","paper_sheet",
+            "book_map_dex","clipboard","snorlax","old_amber","old_amber","lying_old_man","lying_old_man","lying_old_man"};
     }
 }

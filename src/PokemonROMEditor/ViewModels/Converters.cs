@@ -79,6 +79,70 @@ namespace PokemonROMEditor.ViewModels
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            // I don't think I need this
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ShowMapObjectPokemonBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if((MapObjectType)value == MapObjectType.Pokemon)
+            {
+                return Visibility.Visible;
+            }
+            else
+            {
+                return Visibility.Collapsed;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            // I don't think I need this
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ShowMapObjectItemBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if ((MapObjectType)value == MapObjectType.Item)
+            {
+                return Visibility.Visible;
+            }
+            else
+            {
+                return Visibility.Collapsed;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            // I don't think I need this
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ShowMapObjectTrainerBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if ((MapObjectType)value == MapObjectType.Trainer)
+            {
+                return Visibility.Visible;
+            }
+            else
+            {
+                return Visibility.Collapsed;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            // I don't think I need this
             throw new NotImplementedException();
         }
     }
