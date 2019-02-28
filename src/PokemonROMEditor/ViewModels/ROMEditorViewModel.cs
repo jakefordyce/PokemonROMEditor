@@ -25,7 +25,6 @@ namespace PokemonROMEditor.ViewModels
         private int moveByteMax;
         private int trainerByteMax;
         private int shopItemsMax;
-        private string[] spriteFileNames;
         #endregion
 
         #region Data Properties
@@ -441,6 +440,7 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        /*
         private ObservableCollection<BitmapSource> spriteImages;
 
         public ObservableCollection<BitmapSource> SpriteImages
@@ -452,6 +452,23 @@ namespace PokemonROMEditor.ViewModels
             set
             {
                 spriteImages = value;
+                OnPropertyChanged();
+            }
+        }
+        //*/
+
+        private MapObject selectedMapObject;
+
+        public MapObject SelectedMapObject
+        {
+            get
+            {
+                return selectedMapObject;
+            }
+            set
+            {
+                selectedMapObject = value;
+                LoadSelectedMapImages(); //should eventually find a way that doesn't require redrawing the entire map.
                 OnPropertyChanged();
             }
         }
@@ -656,7 +673,7 @@ namespace PokemonROMEditor.ViewModels
             Maps = new ObservableCollection<Map>();
             TrainerGroups = new ObservableCollection<TrainerGroup>();
             Sprites = new ObservableCollection<MapObjectSprite>();
-            SpriteImages = new ObservableCollection<BitmapSource>();
+            //SpriteImages = new ObservableCollection<BitmapSource>();
         }
 
         #region Public Methods        
@@ -919,7 +936,7 @@ namespace PokemonROMEditor.ViewModels
                 //LoadTileset();
                 LoadBlocksetTiles();
                 LoadSpriteBitmaps();
-                LoadSpriteImages();
+                //LoadSpriteImages();
                 UpdateTrainerNames();
 
 
@@ -1149,13 +1166,14 @@ namespace PokemonROMEditor.ViewModels
                     chunkOfBitmap = sourceBitmap.Clone(new Rectangle(0, 0, 16, 16), sourceBitmap.PixelFormat);
 
                     g.DrawImage(chunkOfBitmap, 0, 0, 16, 16);
-                    //chunkOfBitmap.Dispose();
+                    chunkOfBitmap.Dispose();
                 }
                 s.SpriteBitmap = createdBitmap;
-                //sourceBitmap.Dispose();
+                sourceBitmap.Dispose();
             }
         }
 
+        /*
         private void LoadSpriteImages()
         {
             SpriteImages.Clear();
@@ -1164,6 +1182,7 @@ namespace PokemonROMEditor.ViewModels
                 SpriteImages.Add(Bitmap2BitmapSource(s.SpriteBitmap));
             }
         }
+        //*/
 
         private void LoadSelectedMapTilesImages()
         {
@@ -1200,9 +1219,18 @@ namespace PokemonROMEditor.ViewModels
 
             Bitmap chunkOfBitmap;
 
+            int blockToLoad;
+
             for (int i = 0; i < SelectedMap.MapBlockValues.Count(); i++)
             {
-                sourceBitmap = BlockSets.ElementAt((int)selectedMap.TileSetID).Tiles.ElementAt(SelectedMap.MapBlockValues[i]);
+                blockToLoad = SelectedMap.MapBlockValues[i];
+
+                if(blockToLoad >= BlockSets.ElementAt((int)selectedMap.TileSetID).Tiles.Count())
+                {
+                    blockToLoad = 0;
+                }
+
+                sourceBitmap = BlockSets.ElementAt((int)selectedMap.TileSetID).Tiles.ElementAt(blockToLoad);
 
                 createdBitmap = new Bitmap(32, 32);
 
@@ -1217,11 +1245,16 @@ namespace PokemonROMEditor.ViewModels
                             int xpos = (ob.XPosition % 2) * 16;
                             int ypos = (ob.YPosition % 2) * 16;                            
                             g.DrawImage(chunkOfBitmap, xpos, ypos, 16, 16);
+
+                            if(selectedMapObject != null) //highlite the selected object.
+                            {
+                                if (selectedMapObject.XPosition == ob.XPosition && selectedMapObject.YPosition == ob.YPosition)
+                                {
+                                    g.DrawRectangle(new Pen(Color.Red, 2), new Rectangle(xpos, ypos, 16, 16));
+                                }
+                            }
                         }
                     }
-                    // was using these for testing trying to figure out why I couldn't see any sprites.
-                    //chunkOfBitmap = Sprites.ElementAt(2).SpriteBitmap.Clone(new Rectangle(0, 0, 16, 16), Sprites.ElementAt(2).SpriteBitmap.PixelFormat);
-                    //g.DrawImage(chunkOfBitmap, 0, 0, 16, 16);
                 }
 
                 SelectedMapTiles.Add(new MapTile(i, Bitmap2BitmapSource(createdBitmap)));

@@ -16,6 +16,8 @@
         <viewmodels:ShowIndividualLevelBoolConverter x:Key="hideLevelBool" />
         <viewmodels:MapObjectTypeToStringConverter x:Key="mapObjectToString" />
         <viewmodels:ShowMapObjectItemBoolConverter x:Key="mapObjectItemBool" />
+        <viewmodels:ShowMapObjectPokemonBoolConverter x:Key="mapObjectPokemonBool" />
+        <viewmodels:ShowMapObjectTrainerBoolConverter x:Key="mapObjectTrainerBool" />
         <ObjectDataProvider x:Key="typesEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type Type="model:PokeType" />
@@ -636,18 +638,26 @@
                             </ItemsControl>
                         </Grid>
                     </ScrollViewer>
-                    <ListView Grid.Row="0" Grid.Column="4" ItemsSource="{Binding SelectedMap.MapObjects}">
+                    <ListView Grid.Row="0" Grid.Column="4" ItemsSource="{Binding SelectedMap.MapObjects}" SelectedItem="{Binding SelectedMapObject}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <!-- saving for when we are able to update object type <ComboBox SelectedItem="{Binding Path=ObjectType}" ItemsSource="{Binding Source={StaticResource mapObjectTypeEnum}}"/> -->
-                                    <Label Content="{Binding Path=ObjectType, Converter={StaticResource mapObjectToString}}"/>
-                                    <ComboBox SelectedIndex="{Binding Path=SpriteID}" ItemsSource="{Binding DataContext.Sprites, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="SpriteName"/>
-                                    <Label Content="{Binding YPosition}"/>
-                                    <Label Content="{Binding XPosition}"/>
-                                    <ComboBox SelectedItem="{Binding Path=Movement}" ItemsSource="{Binding Source={StaticResource mapObjectMovementTypeEnum}}"/>
-                                    <ComboBox SelectedItem="{Binding Path=Facing}" ItemsSource="{Binding Source={StaticResource mapObjectFacingEnum}}"/>
+                                    <Label Content="{Binding Path=ObjectType, Converter={StaticResource mapObjectToString}}" Width="70"/>
+                                    <ComboBox SelectedIndex="{Binding Path=SpriteID}" ItemsSource="{Binding DataContext.Sprites, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="SpriteName" Width="120"/>
+                                    <Label Content="Y:"/>
+                                    <TextBox Text="{Binding YPosition}" Width="30"/>
+                                    <Label Content="X:"/>
+                                    <TextBox Text="{Binding XPosition}" Width="30"/>
+                                    <ComboBox SelectedItem="{Binding Path=Movement}" ItemsSource="{Binding Source={StaticResource mapObjectMovementTypeEnum}}" Width="75"/>
+                                    <ComboBox SelectedItem="{Binding Path=Facing}" ItemsSource="{Binding Source={StaticResource mapObjectFacingEnum}}" Width="75"/>
                                     <ComboBox SelectedItem="{Binding Path=Item}" ItemsSource="{Binding Source={StaticResource itemEnum}}" Visibility="{Binding Path=ObjectType, Converter={StaticResource mapObjectItemBool}}"/>
+                                    <ComboBox SelectedIndex="{Binding Path=PokemonObj.PokedexID}" ItemsSource="{Binding DataContext.PokeNames, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name" Visibility="{Binding Path=ObjectType, Converter={StaticResource mapObjectPokemonBool}}"/>
+                                    <Label Content="LVL:" Visibility="{Binding Path=ObjectType, Converter={StaticResource mapObjectPokemonBool}}"/>
+                                    <TextBox Text="{Binding PokemonObj.Level}" Visibility="{Binding Path=ObjectType, Converter={StaticResource mapObjectPokemonBool}}" Width="30" />
+                                    <ComboBox SelectedIndex="{Binding Path=TrainerGroupNum}" ItemsSource="{Binding DataContext.TrainerGroups, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="GroupName" Visibility="{Binding Path=ObjectType, Converter={StaticResource mapObjectTrainerBool}}" Width="120"/>
+                                    <Label Content="#" Visibility="{Binding Path=ObjectType, Converter={StaticResource mapObjectTrainerBool}}" />
+                                    <TextBox Text="{Binding TrainerNum}" Visibility="{Binding Path=ObjectType, Converter={StaticResource mapObjectTrainerBool}}" Width="30"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>

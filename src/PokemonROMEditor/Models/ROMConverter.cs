@@ -898,7 +898,7 @@ namespace PokemonROMEditor.Models
                 headerPointer2 = romData[mapHeaderPointersByte + (i * 2) + 1] * 256;
                 currentHeaderByte = currentBank + headerPointer1 + headerPointer2;
 
-                if(romData[currentHeaderByte] < 24) // Make sure the tileset id is correct. 11 maps have bad data.
+                if(romData[currentHeaderByte] < 24 && !(unusedMaps.Contains(i))) // Make sure we are reading from good maps. several maps have bad data.
                 {
                     // read some info about the map from the header
                     newMap = new Map($"map {i}", (TileSet)romData[currentHeaderByte]);
@@ -971,13 +971,15 @@ namespace PokemonROMEditor.Models
                             if(romData[currentObjectsByte] > 200) //ID over 200 means trainer ID
                             {
                                 newMapObject.ObjectType = MapObjectType.Trainer;
-                                newMapObject.TrainerGroupNum = romData[currentObjectsByte++];
+                                newMapObject.TrainerGroupNum = romData[currentObjectsByte++] - 201;
                                 newMapObject.TrainerNum = romData[currentObjectsByte++];
                             }
                             else // ID under 200 means pokedex ID
                             {
                                 newMapObject.ObjectType = MapObjectType.Pokemon;
-                                newMapObject.PokemonObj.PokedexID = romData[currentObjectsByte++];
+                                int foundID = romData[currentObjectsByte++];
+                                newMapObject.PokemonObj.PokedexID = PokedexIDs[foundID]; //the pokemon are stored by indexID. Switch it here to pokedexID
+                                //newMapObject.PokemonObj.PokedexID = romData[currentObjectsByte++];
                                 newMapObject.PokemonObj.Level = romData[currentObjectsByte++];
                             }
                         }
@@ -1338,5 +1340,7 @@ namespace PokemonROMEditor.Models
             "mart_guy","fisher","old_medium_woman","nurse","cable_club_woman","mr_masterball","lapras_giver","warden","ss_captain","fisher2","blackbelt","guard",
             "guard", "mom","balding_guy","young_boy","gameboy_kid","gameboy_kid","clefairy","agatha","bruno","lorelei","seel","ball","omanyte","boulder","paper_sheet",
             "book_map_dex","clipboard","snorlax","old_amber","old_amber","lying_old_man","lying_old_man","lying_old_man"};
+
+        int[] unusedMaps = { 11, 105, 106, 107, 109, 110, 111, 112, 114, 115, 116, 117, 204, 205, 206, 231, 237, 238, 241, 242, 243, 244 };
     }
 }
