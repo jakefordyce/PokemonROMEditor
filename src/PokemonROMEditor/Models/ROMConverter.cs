@@ -106,6 +106,7 @@ namespace PokemonROMEditor.Models
                 //Each Move uses 6 bytes. i = the current move so we take the starting point and add 6 for each move
                 // that we have already read and then add 0-5 as we read through the data fields for that move.
                 // we skip the first byte because it is basically the move ID.
+                moveToAdd.AnimationID = (MoveAnimation)romData[movesStartingByte + (i * 6)];
                 moveToAdd.Effect = (MoveEffect)romData[movesStartingByte + (i * 6) + 1];
                 moveToAdd.Power = romData[movesStartingByte + (i * 6) + 2];
                 moveToAdd.MoveType = (PokeType)romData[movesStartingByte + (i * 6) + 3];
@@ -124,6 +125,7 @@ namespace PokemonROMEditor.Models
 
             for(int i = 0; i < 165; i++)
             {
+                romData[movesStartingByte + (i * 6)] = (byte)moves.ElementAt(i + 1).AnimationID;
                 romData[movesStartingByte + (i * 6) + 1] = (byte)moves.ElementAt(i+1).Effect;
                 romData[movesStartingByte + (i * 6) + 2] = (byte)moves.ElementAt(i+1).Power;
                 romData[movesStartingByte + (i * 6) + 3] = (byte)moves.ElementAt(i+1).MoveType;
@@ -1019,7 +1021,7 @@ namespace PokemonROMEditor.Models
                 headerPointer2 = romData[mapHeaderPointersByte + (i * 2) + 1] * 256;
                 currentHeaderByte = currentBank + headerPointer1 + headerPointer2;
 
-                if (romData[currentHeaderByte] < 24) // Make sure the tileset id is correct. 11 maps have bad data.
+                if (romData[currentHeaderByte] < 24 && !(unusedMaps.Contains(i))) // Make sure we are reading from good maps. several maps have bad data.
                 {
                     // uses the header info to get the location of the map's blocks.
                     blocksPointer1 = romData[currentHeaderByte + 3];

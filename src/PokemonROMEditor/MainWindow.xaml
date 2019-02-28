@@ -68,6 +68,11 @@
                 <x:Type Type="model:MapObjectFacing" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider x:Key="moveAnimationEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:MoveAnimation" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </Window.Resources>
 
     <Grid>
@@ -325,6 +330,7 @@
                   AutoGenerateColumns="False" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}" CanUserSortColumns="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" />
+                        <DataGridComboBoxColumn Header="Animation" SelectedItemBinding="{Binding Path=AnimationID}" ItemsSource="{Binding Source={StaticResource moveAnimationEnum}}"/>
                         <DataGridComboBoxColumn Header="Type" SelectedItemBinding="{Binding Path=MoveType}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
                         <DataGridTextColumn Header="Power" Binding="{Binding Path=Power}" />
                         <DataGridTextColumn Header="Accuracy" Binding="{Binding Path=Accuracy}" />
