@@ -937,16 +937,22 @@ namespace PokemonROMEditor.Models
                     {
                         numOfConnections++;
                     }
+                    newMap.Connections = numOfConnections;
+
                     //each connection is 11 bytes. There can be 0 to 4 connections in a map. The pointer to the object data is after the connections.
                     objectsPointer1 = romData[currentHeaderByte + 10 + (numOfConnections * 11)];
                     objectsPointer2 = romData[currentHeaderByte + 11 + (numOfConnections * 11)] * 256;
                     currentObjectsByte = currentBank + objectsPointer1 + objectsPointer2;
 
                     currentObjectsByte++; // the first byte is the border block. We are skipping that for now.
+
+                    newMap.Warps = romData[currentObjectsByte]; // warps data. Skipping for now
                     numOfExtraBytes = romData[currentObjectsByte] * 4 + 1;
-                    currentObjectsByte += numOfExtraBytes; // warps data. Skipping for now
+                    currentObjectsByte += numOfExtraBytes; 
+
+                    newMap.Signs = romData[currentObjectsByte]; // Signs data. Skipping for now
                     numOfExtraBytes = romData[currentObjectsByte] * 3 + 1;
-                    currentObjectsByte += numOfExtraBytes; // Signs data. Skipping for now
+                    currentObjectsByte += numOfExtraBytes; 
 
                     newMap.MapObjects = new ObservableCollection<MapObject>();
                     numOfObjects = romData[currentObjectsByte++];
@@ -973,15 +979,14 @@ namespace PokemonROMEditor.Models
                             if(romData[currentObjectsByte] > 200) //ID over 200 means trainer ID
                             {
                                 newMapObject.ObjectType = MapObjectType.Trainer;
-                                newMapObject.TrainerGroupNum = romData[currentObjectsByte++] - 201;
+                                newMapObject.TrainerGroupNum = romData[currentObjectsByte++] - 201; //The trainer IDs start at 201 but we are using this to reference a 0 based collection
                                 newMapObject.TrainerNum = romData[currentObjectsByte++];
                             }
                             else // ID under 200 means pokedex ID
                             {
                                 newMapObject.ObjectType = MapObjectType.Pokemon;
                                 int foundID = romData[currentObjectsByte++];
-                                newMapObject.PokemonObj.PokedexID = PokedexIDs[foundID]; //the pokemon are stored by indexID. Switch it here to pokedexID
-                                //newMapObject.PokemonObj.PokedexID = romData[currentObjectsByte++];
+                                newMapObject.PokemonObj.PokedexID = PokedexIDs[foundID]; //the pokemon are stored by indexID. Switch it here to pokedexID                                
                                 newMapObject.PokemonObj.Level = romData[currentObjectsByte++];
                             }
                         }
@@ -1011,7 +1016,12 @@ namespace PokemonROMEditor.Models
             int currentBlocksByte;
             int blocksPointer1;
             int blocksPointer2;
-            int currentMap = 0; //using this to keep track of which map index to use since we skipped loading 11 of the 247 maps.
+            int numOfConnections;
+            int objectsPointer1;
+            int objectsPointer2;
+            int currentObjectsByte;
+            int numOfExtraBytes;
+            int currentMap = 0; //using this to keep track of which map index to use since we skipped loading some of the 247 maps.
 
             for (int i = 0; i < 248; i++) //There are somehow 248 maps in the game.
             {
@@ -1021,7 +1031,7 @@ namespace PokemonROMEditor.Models
                 headerPointer2 = romData[mapHeaderPointersByte + (i * 2) + 1] * 256;
                 currentHeaderByte = currentBank + headerPointer1 + headerPointer2;
 
-                if (romData[currentHeaderByte] < 24 && !(unusedMaps.Contains(i))) // Make sure we are reading from good maps. several maps have bad data.
+                if (romData[currentHeaderByte] < 24 && !(unusedMaps.Contains(i))) // Make sure we are saving the good maps. several maps have bad data.
                 {
                     // uses the header info to get the location of the map's blocks.
                     blocksPointer1 = romData[currentHeaderByte + 3];
@@ -1033,6 +1043,47 @@ namespace PokemonROMEditor.Models
                     {
                         romData[currentBlocksByte + m] = (byte)maps.ElementAt(currentMap).MapBlockValues[m];
                     }
+
+                    numOfConnections = maps.ElementAt(currentMap).Connections;
+
+                    objectsPointer1 = romData[currentHeaderByte + 10 + (numOfConnections * 11)];
+                    objectsPointer2 = romData[currentHeaderByte + 11 + (numOfConnections * 11)] * 256;
+                    currentObjectsByte = currentBank + objectsPointer1 + objectsPointer2;
+
+                    currentObjectsByte++; // the first byte is the border block. We are skipping that for now.
+                    numOfExtraBytes = maps.ElementAt(currentMap).Warps * 4 + 1; // warps data. Skipping for now
+                    currentObjectsByte += numOfExtraBytes;
+
+                    numOfExtraBytes = maps.ElementAt(currentMap).Signs * 3 + 1; // Signs data. Skipping for now
+                    currentObjectsByte += numOfExtraBytes;
+
+                    currentObjectsByte++; //number of objects. We aren't changing this yet so we don't need to actually save it.
+
+                    foreach(var obj in maps.ElementAt(currentMap).MapObjects)
+                    {
+                        romData[currentObjectsByte++] = (byte)(obj.SpriteID + 1); // +1 because we subtracted 1 while loading
+                        romData[currentObjectsByte++] = (byte)(obj.YPosition + 4); // +4 because we subtracted 4 while loading
+                        romData[currentObjectsByte++] = (byte)(obj.XPosition + 4);
+                        romData[currentObjectsByte++] = (byte)obj.Movement;
+                        romData[currentObjectsByte++] = (byte)obj.Facing;
+                        currentObjectsByte++; //skipping the textstringID for now
+                        if(obj.ObjectType == MapObjectType.Item)
+                        {
+                            romData[currentObjectsByte++] = (byte)obj.Item;
+                        }
+                        else if(obj.ObjectType == MapObjectType.Pokemon)
+                        {
+                            romData[currentObjectsByte++] = (byte)IndexIDs[obj.PokemonObj.PokedexID+1];
+                            romData[currentObjectsByte++] = (byte)obj.PokemonObj.Level;
+                        }
+                        else if(obj.ObjectType == MapObjectType.Trainer)
+                        {
+                            romData[currentObjectsByte++] = (byte)(obj.TrainerGroupNum + 201);
+                            romData[currentObjectsByte++] = (byte)obj.TrainerNum;
+                        }
+                        // No extra data here for Person types so just skipping that for now.
+                    }
+
                     currentMap++;
                 }
 

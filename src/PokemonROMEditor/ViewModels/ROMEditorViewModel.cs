@@ -417,7 +417,21 @@ namespace PokemonROMEditor.ViewModels
             }
             set
             {
-                selectedMap = value;               
+                if (selectedMap != null)
+                {
+                    foreach (var ob in SelectedMap.MapObjects)
+                    {
+                        ob.SpriteChanged -= UpdateMapSprites;
+                    }
+                }
+                selectedMap = value;
+                if (selectedMap != null)
+                {
+                    foreach (var ob in SelectedMap.MapObjects)
+                    {
+                        ob.SpriteChanged += UpdateMapSprites;
+                    }
+                }
                 //LoadTileset();
                 LoadSelectedMapTilesImages();
                 LoadSelectedMapImages();
@@ -1207,7 +1221,7 @@ namespace PokemonROMEditor.ViewModels
 
         //Need this to free up memory after using GetHbitmap()
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
+        private static extern bool DeleteObject(IntPtr hObject);
 
         private void LoadSelectedMapImages()
         {
@@ -1275,6 +1289,11 @@ namespace PokemonROMEditor.ViewModels
                                  select g.GroupName).First() + " " + t.TrainerNum;
             }
             OnPropertyChanged("Trainers");
+        }
+
+        private void UpdateMapSprites(object sender, EventArgs e)
+        {
+            LoadSelectedMapImages();
         }
 
         #endregion

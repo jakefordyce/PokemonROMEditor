@@ -22,6 +22,9 @@ namespace PokemonROMEditor.Models
         public int[] MapBlockValues { get; set; }
         public TileSet TileSetID { get; }
         public ObservableCollection<MapObject> MapObjects { get; set; }
+        public int Connections { get; set; } //this is temporary until we start working with the connection data.
+        public int Signs { get; set; }
+        public int Warps { get; set; }
     }
 
     public class BlockSet
@@ -44,6 +47,8 @@ namespace PokemonROMEditor.Models
 
     public class MapObject
     {
+        public event EventHandler SpriteChanged;
+
         public MapObject()
         {
             // Setting up some default values. Not all data will be used for every object
@@ -51,19 +56,54 @@ namespace PokemonROMEditor.Models
             PokemonObj.PokedexID = 1;
             PokemonObj.Level = 1;
             Item = ItemType.ANTIDOTE;
-            TrainerGroupNum = 201;
+            TrainerGroupNum = 0;
             TrainerNum = 1;
         }
-        public int SpriteID { get; set; }
+        private int spriteID;
+        public int SpriteID
+        {
+            get
+            {
+                return spriteID;
+            }
+            set
+            {
+                spriteID = value;
+                OnSpriteChanged();
+            }
+        }
         public MapObjectType ObjectType { get; set; }
-        public int YPosition { get; set; }
-        public int XPosition { get; set; }
+        private int yPosition;
+        public int YPosition
+        {
+            get { return yPosition; }
+            set
+            {
+                yPosition = value;
+                OnSpriteChanged();
+            }
+        }
+        private int xPosition;
+        public int XPosition
+        {
+            get { return xPosition; }
+            set
+            {
+                xPosition = value;
+                OnSpriteChanged();
+            }
+        }
         public MapObjectMovementType Movement { get; set; }
         public MapObjectFacing Facing { get; set; }
         public ItemType Item { get; set; }
         public EnemyPokemon PokemonObj { get; set; }
         public int TrainerGroupNum { get; set; }
         public int TrainerNum { get; set; }
+
+        protected virtual void OnSpriteChanged()
+        {
+            SpriteChanged?.Invoke(this, new EventArgs());
+        }
     }
 
     public class MapObjectSprite
