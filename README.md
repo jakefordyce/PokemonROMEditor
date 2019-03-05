@@ -7,7 +7,7 @@ This is a program for editing Pokemon ROMs. Currently the focus is on Gen 1.
 ## Currently Supported Games
 * Pokemon RED (.gb)
 
-List of [**Features**](https://github.com/jakefordyce/PokemonROMEditor/blob/master/Features.md)
+For a list of features and information on how to use the program, see [**Features.md**](https://github.com/jakefordyce/PokemonROMEditor/blob/master/Features.md)
 
 Icon from http://pngimg.com/imgs/fantasy/pokeball/
 
