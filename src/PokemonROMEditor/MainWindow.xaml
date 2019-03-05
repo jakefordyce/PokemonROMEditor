@@ -353,7 +353,7 @@
                         <DataGridTextColumn Header="Power" Binding="{Binding Path=Power}" />
                         <DataGridTextColumn Header="Accuracy" Binding="{Binding Path=Accuracy}" />
                         <DataGridTextColumn Header="PP" Binding="{Binding Path=PP}" />
-                        <DataGridComboBoxColumn Header="Type" SelectedItemBinding="{Binding Path=Effect}" ItemsSource="{Binding Source={StaticResource moveEffectsEnum}}"/>
+                        <DataGridComboBoxColumn Header="Effect" SelectedItemBinding="{Binding Path=Effect}" ItemsSource="{Binding Source={StaticResource moveEffectsEnum}}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>

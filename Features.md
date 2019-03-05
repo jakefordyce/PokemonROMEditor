@@ -2,27 +2,16 @@
 
 Edit Pokemon stats in the [Pokemon Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/PokemonTab.md)
 
+Edit the available Moves in the [Moves Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/MovesTab.md)
 
-* Moves
+Edit the Items in the [Items Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/ItemsTab.md)
 
-![Moves Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/MovesTab.PNG)
+Edit the Types in the [Types Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/TypesTab.md)
 
-* Items
+Edit Wild Encounters in the [Encounters Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/EncountersTab.md)
 
-![Items Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/ItemsTab.PNG)
+Edit Trainers in the [Trainers Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/TrainersTab.md)
 
-* Types
+Edit PokeMarts in the [Shops Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/ShopsTab.md)
 
-![Types Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/TypesTab.PNG)
-
-* Wild Encounters
-
-![Encounters Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/EncountersTab.PNG)
-
-* Trainer Pokemon
-
-![Trainers Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/TrainersTab.PNG)
-
-* Shop Inventories
-
-![Shops Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/ShopsTab.PNG)
+Edit the Maps in the [Maps Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/MapsTab.md)
