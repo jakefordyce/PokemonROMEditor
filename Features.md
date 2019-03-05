@@ -1,11 +1,8 @@
 ## Features
 
-* Pokemon stats  
-  
-![Pokemon Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/PokemonTab.PNG)
+Edit Pokemon stats in the [Pokemon Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/PokemonTab.md)
 
-![Pokemon Tab Grid](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/PokemonTabGrid.PNG)
-  
+
 * Moves
 
 ![Moves Tab](https://github.com/jakefordyce/PokemonROMEditor/blob/master/images/MovesTab.PNG)
