@@ -40,9 +40,7 @@ namespace PokemonROMEditor.Models
         int moveNamesByte = 720896; //The data for move names starts at 0xB0000 bytes into the file which is 720896 in Decimal.
 
         int typesBankByte = 0x20000; // bank 9
-        int typesPointer = 0x7DAE; // this is a pointer within a bank, not the full address
-
-        string imageFolder = "..\\..\\SourceImages\\";
+        int typesPointer = 0x7DAE; // this is a pointer within a bank, not the full address        
 
         //The locations of the pointers for each shop.
         //The first 0x00 is the bike shop. The script for the bike shop menu doesn't actually look at the bike shop's items.
@@ -965,7 +963,7 @@ namespace PokemonROMEditor.Models
 
                 bs = new BlockSet();
                 bs.Tiles = new ObservableCollection<System.Drawing.Bitmap>();
-                bs.SourceFile = imageFolder + blocksetPngNames[i]; //this is the name of the png file that is used to create the block images.
+                bs.SourceFile = blocksetPngNames[i]; //this is the name of the png file that is used to create the block images.
                 bs.BlockDefinitions = new int[blocksetSizes[i]]; //blocksetSizes is a list of how many bytes are used for each blockset
                 for(int j = 0; j < blocksetSizes[i]; j++)
                 {
@@ -987,7 +985,7 @@ namespace PokemonROMEditor.Models
             {
                 MapObjectSprite newSprite = new MapObjectSprite();
                 newSprite.SpriteName = spritePngNames[i];
-                newSprite.FileName = imageFolder + spritePngNames[i] + ".png";
+                newSprite.FileName = spritePngNames[i] + ".png";
                 sprites.Add(newSprite);
             }
 

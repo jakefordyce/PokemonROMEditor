@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -24,7 +25,8 @@ namespace PokemonROMEditor.ViewModels
         private ROMConverter romConverter;        
         private int moveByteMax;
         private int trainerByteMax;
-        private int shopItemsMax;
+        private int shopItemsMax;        
+        private string resourceBase = "PokemonROMEditor.SourceImages.";
         #endregion
 
         #region Data Properties
@@ -1129,13 +1131,13 @@ namespace PokemonROMEditor.ViewModels
             int numOfTiles;
             int xpos;
             int ypos;
-            int currentByte;
+            int currentByte;            
 
             foreach (var b in BlockSets)
             {
                 b.Tiles.Clear();
                 
-                sourceBitmap = new Bitmap(b.SourceFile);
+                sourceBitmap = new Bitmap( Assembly.GetEntryAssembly().GetManifestResourceStream(resourceBase + b.SourceFile));
 
                 numOfTiles = b.BlockDefinitions.Count() / 16;
 
@@ -1184,11 +1186,11 @@ namespace PokemonROMEditor.ViewModels
         {
             Bitmap sourceBitmap;
             Bitmap createdBitmap;
-            Bitmap chunkOfBitmap;
+            Bitmap chunkOfBitmap;            
 
             foreach (var s in Sprites)
-            {
-                sourceBitmap = new Bitmap(s.FileName);
+            {                
+                sourceBitmap = new Bitmap(Assembly.GetEntryAssembly().GetManifestResourceStream(resourceBase + s.FileName));
 
                 createdBitmap = new Bitmap(16, 16);
 
