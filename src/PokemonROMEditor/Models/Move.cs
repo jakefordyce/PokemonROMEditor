@@ -22,7 +22,7 @@ namespace PokemonROMEditor.Models
         public int ID { get; set; }
         public MoveAnimation AnimationID { get; set; }
         public int Power { get; set; }
-        public PokeType MoveType { get; set; }
+        public int MoveType { get; set; }
         public int Accuracy { get; set; }
         public int PP { get; set; }
         public MoveEffect Effect { get; set; }

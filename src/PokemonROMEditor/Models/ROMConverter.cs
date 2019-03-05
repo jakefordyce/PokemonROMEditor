@@ -39,6 +39,9 @@ namespace PokemonROMEditor.Models
         int tmPricesStartByte = 507815; //TM prices start at byte 0x7BFA7
         int moveNamesByte = 720896; //The data for move names starts at 0xB0000 bytes into the file which is 720896 in Decimal.
 
+        int typesBankByte = 0x20000; // bank 9
+        int typesPointer = 0x7DAE; // this is a pointer within a bank, not the full address
+
         string imageFolder = "..\\..\\SourceImages\\";
 
         //The locations of the pointers for each shop.
@@ -60,7 +63,7 @@ namespace PokemonROMEditor.Models
 
         public void SaveROMDataToFile(string fileName, ObservableCollection<Move> moves, ObservableCollection<Pokemon> pokemons, ObservableCollection<TypeStrength> str,
                                         ObservableCollection<TM> tms, ObservableCollection<WildEncounterZone> zones, ObservableCollection<Trainer> trainers, ObservableCollection<Shop> shops,
-                                        ObservableCollection<Item> items, ObservableCollection<Map> maps)
+                                        ObservableCollection<Item> items, ObservableCollection<Map> maps, ObservableCollection<PokeType> types)
         {            
             // first update the byte array with the data that the user has modified.
             SaveMoves(moves);
@@ -72,6 +75,7 @@ namespace PokemonROMEditor.Models
             SaveShops(shops);
             SaveItems(items);
             SaveMaps(maps);
+            SavePokeTypes(types);
             // then just write the new byte array to file.
             File.WriteAllBytes(fileName, romData);
         }
@@ -109,7 +113,7 @@ namespace PokemonROMEditor.Models
                 moveToAdd.AnimationID = (MoveAnimation)romData[movesStartingByte + (i * 6)];
                 moveToAdd.Effect = (MoveEffect)romData[movesStartingByte + (i * 6) + 1];
                 moveToAdd.Power = romData[movesStartingByte + (i * 6) + 2];
-                moveToAdd.MoveType = (PokeType)romData[movesStartingByte + (i * 6) + 3];
+                moveToAdd.MoveType = romData[movesStartingByte + (i * 6) + 3];
                 moveToAdd.Accuracy = romData[movesStartingByte + (i * 6) + 4];
                 moveToAdd.PP = romData[movesStartingByte + (i * 6) + 5];
 
@@ -166,8 +170,8 @@ namespace PokemonROMEditor.Models
                 pokeToAdd.Defense = romData[pokemonStartByte + (i * 28) + 3];
                 pokeToAdd.Speed = romData[pokemonStartByte + (i * 28) + 4];
                 pokeToAdd.Special = romData[pokemonStartByte + (i * 28) + 5];
-                pokeToAdd.Type1 = (PokeType)romData[pokemonStartByte + (i * 28) + 6];
-                pokeToAdd.Type2 = (PokeType)romData[pokemonStartByte + (i * 28) + 7];
+                pokeToAdd.Type1 = romData[pokemonStartByte + (i * 28) + 6];
+                pokeToAdd.Type2 = romData[pokemonStartByte + (i * 28) + 7];
                 pokeToAdd.CatchRate = romData[pokemonStartByte + (i * 28) + 8];
                 pokeToAdd.ExpYield = romData[pokemonStartByte + (i * 28) + 9];
                 pokeToAdd.Move1 = romData[pokemonStartByte + (i * 28) + 15];
@@ -197,8 +201,8 @@ namespace PokemonROMEditor.Models
             pokeToAdd.Defense = romData[mewStartByte + 3];
             pokeToAdd.Speed = romData[mewStartByte + 4];
             pokeToAdd.Special = romData[mewStartByte + 5];
-            pokeToAdd.Type1 = (PokeType)romData[mewStartByte + 6];
-            pokeToAdd.Type2 = (PokeType)romData[mewStartByte + 7];
+            pokeToAdd.Type1 = romData[mewStartByte + 6];
+            pokeToAdd.Type2 = romData[mewStartByte + 7];
             pokeToAdd.CatchRate = romData[mewStartByte + 8];
             pokeToAdd.ExpYield = romData[mewStartByte + 9];
             pokeToAdd.Move1 = romData[mewStartByte + 15];
@@ -421,6 +425,123 @@ namespace PokemonROMEditor.Models
             }
         }
 
+        public ObservableCollection<PokeType> LoadPokeTypes()
+        {
+            ObservableCollection<PokeType> types = new ObservableCollection<PokeType>();
+            PokeType newType;
+            int currentPointerByte = typesBankByte + typesPointer;
+            int namesStartByte;
+            int currentNamesByte;
+            string typeName;
+
+            int namePointer1 = romData[currentPointerByte++];
+            int namePointer2 = romData[currentPointerByte++] * 256;
+
+            currentPointerByte -= 2; //reset position because it will be read again in the loop
+
+            //to know that we've reached the end of pointers we will stop at location of the first name
+            namesStartByte = typesBankByte + namePointer1 + namePointer2;            
+
+            while (currentPointerByte < namesStartByte)
+            {
+                newType = new PokeType();
+                typeName = "";
+
+                //get the location of the type's name
+                namePointer1 = romData[currentPointerByte++];
+                namePointer2 = romData[currentPointerByte++] * 256;
+                currentNamesByte = typesBankByte + namePointer1 + namePointer2;
+                
+                // the unused types all point to the first name: "NORMAL"
+                if (currentNamesByte == namesStartByte && types.Count() != 0)
+                {
+                    newType.TypeUsed = false;
+                }
+                else
+                {
+                    newType.TypeUsed = true;
+                }
+
+                // read the name of each type
+                while (romData[currentNamesByte] != 0x50) //0x50 is the deliminator for the end of a name.
+                {
+                    typeName += Letters[romData[currentNamesByte++]];
+                }
+                if (!newType.TypeUsed)
+                {
+                    typeName = "(unused)";
+                }
+                newType.TypeName = typeName;
+
+                types.Add(newType);
+            }
+
+            return types;
+        }
+
+        private void SavePokeTypes(ObservableCollection<PokeType> types)
+        {
+            int endOfOriginalSpace = 0x27e4a; // this is the first byte of some data that is between the type names and the extra space at the end of the bank.
+            int blankDataStartByte = 0x27fb8; // there is some extra space at the end of the bank. This is the first byte of that space.
+            //int endOfBank = 0x28000; // this is the first byte of the next bank. We can't write on this byte or any after it.
+            int firstPointerByte;
+            int secondPointerByte;
+
+            //setup a class that will help us track where we are saving data.
+            ROMBank romBank = new ROMBank(typesPointer + typesBankByte, 0x27fff);
+
+            //get a reference to the block of data that we don't want to overwrite.
+            int saveFunctionBlock = romBank.AddDataBlock(endOfOriginalSpace, blankDataStartByte - 1);
+
+            int numOfPointerBytes = types.Count() * 2; // there are 2 bytes for each pointer and we need a pointer for each type even if it is not used.
+            int currentPointerByte = typesBankByte + typesPointer; // this is the beginning of the pointers.
+            int currentNamesByte = currentPointerByte + numOfPointerBytes; //this is where we will start writing the names.
+
+            //get a reference to the block of data that has the pointers.
+            int pointersBlock = romBank.AddDataBlock(currentPointerByte, currentNamesByte - 1);
+
+            int firstNamesByte = currentNamesByte; // save the first name location for the types that aren't used.
+            
+            foreach(var t in types)
+            {
+                if(t.TypeUsed == true) // if the type is used point to the correct name.
+                {
+                    // check our bank to find where our free space is located.
+                    currentNamesByte = romBank.HasRoomAt(t.TypeName.Length+1);
+                    
+                    // if there is no space it will return negative.
+                    if(currentNamesByte >= 0)
+                    {
+                        romBank.AddData(currentNamesByte, t.TypeName.Length+1);
+                        secondPointerByte = (currentNamesByte - typesBankByte) / 256;
+                        firstPointerByte = (currentNamesByte - typesBankByte) - (secondPointerByte * 256);
+                        // write the pointer to the name
+                        romData[currentPointerByte++] = (byte)firstPointerByte;
+                        romData[currentPointerByte++] = (byte)secondPointerByte;
+
+                        // write the name
+                        foreach (var s in t.TypeName)
+                        {
+                            romData[currentNamesByte] = (byte)LetterValues[s.ToString().ToUpper()];
+                            currentNamesByte++;
+                        }
+                        romData[currentNamesByte] = 0x50;
+                    }
+                }
+                else // if the type isn't used point to the first name.
+                {
+                    secondPointerByte = (firstNamesByte - typesBankByte) / 256;
+                    firstPointerByte = (firstNamesByte - typesBankByte) - (secondPointerByte * 256);
+                    // write the pointer to the name
+                    romData[currentPointerByte++] = (byte)firstPointerByte;
+                    romData[currentPointerByte++] = (byte)secondPointerByte;
+                }
+                                
+            }
+
+
+        }
+
         public ObservableCollection<TypeStrength> LoadTypeStrengths()
         {
             var typeStrengths = new ObservableCollection<TypeStrength>();
@@ -431,8 +552,8 @@ namespace PokemonROMEditor.Models
                 if(romData[typeChartByte + (i * 3)] != 0xFF)
                 {
                     typeStrengthToAdd = new TypeStrength();
-                    typeStrengthToAdd.AttackType = (PokeType)romData[typeChartByte + (i * 3)]; //first byte is the attacking type
-                    typeStrengthToAdd.DefenseType = (PokeType)romData[typeChartByte + (i * 3) + 1]; //second byte is the defending type
+                    typeStrengthToAdd.AttackType = romData[typeChartByte + (i * 3)]; //first byte is the attacking type
+                    typeStrengthToAdd.DefenseType = romData[typeChartByte + (i * 3) + 1]; //second byte is the defending type
                     typeStrengthToAdd.Effectiveness = (DamageModifier)romData[typeChartByte + (i * 3) + 2]; //third byte is effectiveness X 10. So double damage = 20, half damage = 5.
                     typeStrengths.Add(typeStrengthToAdd);
                 }

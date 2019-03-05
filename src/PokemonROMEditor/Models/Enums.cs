@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace PokemonROMEditor.Models
 {
+    /*
     public enum PokeType
     {
         NORMAL = 0,
@@ -24,6 +25,7 @@ namespace PokemonROMEditor.Models
         ICE = 25,
         DRAGON = 26
     };
+    //*/
 
     public enum EvolveType
     {

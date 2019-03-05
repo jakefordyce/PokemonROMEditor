@@ -51,8 +51,8 @@ namespace PokemonROMEditor.Models
                 return (HP + Attack + Defense + Speed + Special);
             }
         }
-        public PokeType Type1 { get; set; }
-        public PokeType Type2 { get; set; }
+        public int Type1 { get; set; }
+        public int Type2 { get; set; }
         public int CatchRate { get; set; }
         public int ExpYield { get; set; }
         public int Move1 { get; set; }

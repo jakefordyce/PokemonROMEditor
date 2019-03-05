@@ -18,11 +18,11 @@
         <viewmodels:ShowMapObjectItemBoolConverter x:Key="mapObjectItemBool" />
         <viewmodels:ShowMapObjectPokemonBoolConverter x:Key="mapObjectPokemonBool" />
         <viewmodels:ShowMapObjectTrainerBoolConverter x:Key="mapObjectTrainerBool" />
-        <ObjectDataProvider x:Key="typesEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+        <!--<ObjectDataProvider x:Key="typesEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type Type="model:PokeType" />
             </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
+        </ObjectDataProvider>-->
         <ObjectDataProvider x:Key="moveEffectsEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type Type="model:MoveEffect" />
@@ -228,8 +228,8 @@
                             <ComboBox SelectedItem="{Binding Path=SelectedPokemon.GrowthRate}" ItemsSource="{Binding Source={StaticResource growthEnum}}" Grid.Column="1" Grid.Row="10"/>
                             <TextBlock Text="Type1:" Grid.Column="0" Grid.Row="11"/>
                             <TextBlock Text="Type2:" Grid.Column="0" Grid.Row="12"/>
-                            <ComboBox SelectedItem="{Binding Path=SelectedPokemon.Type1}" ItemsSource="{Binding Source={StaticResource typesEnum}}" Grid.Column="1" Grid.Row="11"/>
-                            <ComboBox SelectedItem="{Binding Path=SelectedPokemon.Type2}" ItemsSource="{Binding Source={StaticResource typesEnum}}" Grid.Column="1" Grid.Row="12"/>
+                            <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Type1}" ItemsSource="{Binding Path=PokeTypes}" DisplayMemberPath="TypeName" Grid.Column="1" Grid.Row="11"/>
+                            <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Type2}" ItemsSource="{Binding Path=PokeTypes}" DisplayMemberPath="TypeName" Grid.Column="1" Grid.Row="12"/>
                             <TextBlock Text="Starting Moves" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="13"/>
                             <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move1}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="14" Grid.ColumnSpan="2"/>
                             <ComboBox SelectedIndex="{Binding Path=SelectedPokemon.Move2}" ItemsSource="{Binding Path=MoveNames}" DisplayMemberPath="Name" Grid.Column="0" Grid.Row="15" Grid.ColumnSpan="2"/>
@@ -316,8 +316,20 @@
                             <DataGridTextColumn Header="Speed" Binding="{Binding Path=Speed}" />
                             <DataGridTextColumn Header="Special" Binding="{Binding Path=Special}" />
                             <DataGridTextColumn Header="Total" Binding="{Binding Path=StatTotal}" IsReadOnly="True" />
-                            <DataGridComboBoxColumn Header="Type1" SelectedItemBinding="{Binding Path=Type1}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
-                            <DataGridComboBoxColumn Header="Type2" SelectedItemBinding="{Binding Path=Type2}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
+                            <DataGridTemplateColumn Header="Type1" SortMemberPath="Type1">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox SelectedIndex="{Binding Type1}" ItemsSource="{Binding DataContext.PokeTypes, RelativeSource={RelativeSource AncestorType=DataGrid}}" DisplayMemberPath="TypeName" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Type2" SortMemberPath="Type2">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox SelectedIndex="{Binding Type2}" ItemsSource="{Binding DataContext.PokeTypes, RelativeSource={RelativeSource AncestorType=DataGrid}}" DisplayMemberPath="TypeName" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Header="CatchRate" Binding="{Binding Path=CatchRate}" />
                             <DataGridTextColumn Header="ExpYield" Binding="{Binding Path=ExpYield}" />
                             <DataGridComboBoxColumn Header="GrowthRate" SelectedItemBinding="{Binding Path=GrowthRate}" ItemsSource="{Binding Source={StaticResource growthEnum}}"/>
@@ -331,7 +343,13 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Name" Binding="{Binding Path=Name}" />
                         <DataGridComboBoxColumn Header="Animation" SelectedItemBinding="{Binding Path=AnimationID}" ItemsSource="{Binding Source={StaticResource moveAnimationEnum}}"/>
-                        <DataGridComboBoxColumn Header="Type" SelectedItemBinding="{Binding Path=MoveType}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
+                        <DataGridTemplateColumn Header="Type" SortMemberPath="MoveType">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox SelectedIndex="{Binding MoveType}" ItemsSource="{Binding DataContext.PokeTypes, RelativeSource={RelativeSource AncestorType=DataGrid}}" DisplayMemberPath="TypeName" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Power" Binding="{Binding Path=Power}" />
                         <DataGridTextColumn Header="Accuracy" Binding="{Binding Path=Accuracy}" />
                         <DataGridTextColumn Header="PP" Binding="{Binding Path=PP}" />
@@ -381,6 +399,7 @@
                 <Grid Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -390,19 +409,38 @@
                     <DataGrid  ItemsSource="{Binding TypeStrengths}" AlternatingRowBackground="LightGray" CanUserAddRows="False" CanUserDeleteRows="False"
                         AutoGenerateColumns="False" ScrollViewer.CanContentScroll="True"
                             Grid.Column="0" Grid.Row="1">
-                    <DataGrid.Columns>
-                        <DataGridComboBoxColumn Header="Attacking Type" SelectedItemBinding="{Binding Path=AttackType}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
-                        <DataGridComboBoxColumn Header="Defending Type" SelectedItemBinding="{Binding Path=DefenseType}" ItemsSource="{Binding Source={StaticResource typesEnum}}"/>
-                        <DataGridComboBoxColumn Header="Effectiveness" SelectedItemBinding="{Binding Path=Effectiveness}" ItemsSource="{Binding Source={StaticResource damageModEnum}}"/>
-                        <DataGridTemplateColumn Header="Delete">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content=" X " Command="{Binding DataContext.DeleteTypeStrength, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Attacking Type" SortMemberPath="AttackType">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox SelectedIndex="{Binding AttackType}" ItemsSource="{Binding DataContext.PokeTypes, RelativeSource={RelativeSource AncestorType=DataGrid}}" DisplayMemberPath="TypeName" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Defending Type" SortMemberPath="DefenseType">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox SelectedIndex="{Binding DefenseType}" ItemsSource="{Binding DataContext.PokeTypes, RelativeSource={RelativeSource AncestorType=DataGrid}}" DisplayMemberPath="TypeName" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridComboBoxColumn Header="Effectiveness" SelectedItemBinding="{Binding Path=Effectiveness}" ItemsSource="{Binding Source={StaticResource damageModEnum}}"/>
+                            <DataGridTemplateColumn Header="Delete">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content=" X " Command="{Binding DataContext.DeleteTypeStrength, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Button Grid.Column="1" Grid.Row="0" Content="Add Row" />
+                    <DataGrid Grid.Column="1" Grid.Row="1" ItemsSource="{Binding PokeTypes}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Path=TypeName}" />
+                            <DataGridCheckBoxColumn Header="Is Enabled" Binding="{Binding Path=TypeUsed}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
             <TabItem Header="Encounters">

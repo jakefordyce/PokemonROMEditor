@@ -190,6 +190,21 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private ObservableCollection<PokeType> pokeTypes;
+
+        public ObservableCollection<PokeType> PokeTypes
+        {
+            get
+            {
+                return pokeTypes;
+            }
+            set
+            {
+                pokeTypes = value;
+                OnPropertyChanged();
+            }
+        }
+
         private ObservableCollection<TypeStrength> typeStrengths;
 
         public ObservableCollection<TypeStrength> TypeStrengths
@@ -676,6 +691,7 @@ namespace PokemonROMEditor.ViewModels
             romConverter = new ROMConverter();
             PokemonTMs = new ObservableCollection<TMCompatible>();
             AllTMs = new ObservableCollection<TM>();
+            PokeTypes = new ObservableCollection<PokeType>();
             TypeStrengths = new ObservableCollection<TypeStrength>();
             EncounterZones = new ObservableCollection<WildEncounterZone>();
             Trainers = new ObservableCollection<Trainer>();
@@ -926,6 +942,7 @@ namespace PokemonROMEditor.ViewModels
                 OnPropertyChanged("RomFile");
                 //load data from ROM
                 romConverter.LoadROMDataFromFile(romFile);
+                PokeTypes = romConverter.LoadPokeTypes();
                 Moves = romConverter.LoadMoves();
                 Pokemons = romConverter.LoadPokemon();
                 AllTMs = romConverter.LoadTMs();
@@ -978,7 +995,7 @@ namespace PokemonROMEditor.ViewModels
 
         private void SaveFile()
         {
-            romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops, Items, Maps);
+            romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops, Items, Maps, PokeTypes);
             DataLoaded = true;
         }
 
