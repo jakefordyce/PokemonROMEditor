@@ -504,6 +504,21 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private string statusText;
+
+        public string StatusText
+        {
+            get
+            {
+                return statusText;
+            }
+            set
+            {
+                statusText = value;
+                OnPropertyChanged();
+            }
+        }
+
         #endregion
 
         #region Behavior Properties
@@ -688,6 +703,7 @@ namespace PokemonROMEditor.ViewModels
         {
             DataLoaded = false;
             showFullPokemonView = true;
+            StatusText = "Click Open to load a ROM";
             Moves = new ObservableCollection<Move>();
             Pokemons = new ObservableCollection<Pokemon>();
             romConverter = new ROMConverter();
@@ -930,7 +946,8 @@ namespace PokemonROMEditor.ViewModels
 
         #region Private Methods
 
-        private void OpenFile()
+        // shitty async implementation but it works for my purposes.
+        private async Task OpenFile()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             // for now just looking for regular Gameboy roms since this is designed for Pokemon Red.
@@ -940,10 +957,12 @@ namespace PokemonROMEditor.ViewModels
             bool? result = ofd.ShowDialog();
             if (result == true)
             {
+                DataLoaded = false;
+                StatusText = "Loading...";
                 romFile = ofd.FileName;
                 OnPropertyChanged("RomFile");
                 //load data from ROM
-                romConverter.LoadROMDataFromFile(romFile);
+                await Task.Run(() => romConverter.LoadROMDataFromFile(romFile));
                 PokeTypes = romConverter.LoadPokeTypes();
                 Moves = romConverter.LoadMoves();
                 Pokemons = romConverter.LoadPokemon();
@@ -967,8 +986,8 @@ namespace PokemonROMEditor.ViewModels
                 CountShopItems();
 
                 //LoadTileset();
-                LoadBlocksetTiles();
-                LoadSpriteBitmaps();
+                await Task.Run(() => LoadBlocksetTiles());
+                await Task.Run(() => LoadSpriteBitmaps());
                 //LoadSpriteImages();
                 UpdateTrainerNames();
 
@@ -995,9 +1014,11 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
-        private void SaveFile()
+        private async Task SaveFile()
         {
-            romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops, Items, Maps, PokeTypes);
+            DataLoaded = false;
+            StatusText = "Saving...";
+            await Task.Run(() => romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops, Items, Maps, PokeTypes));
             DataLoaded = true;
         }
 

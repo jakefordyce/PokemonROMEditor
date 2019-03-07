@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -50,7 +50,7 @@ namespace PokemonROMEditor.ViewModels
         }
     }
 
-    public class ShowIndividualLevelBoolConverter : IValueConverter
+    public class ReverseBoolConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

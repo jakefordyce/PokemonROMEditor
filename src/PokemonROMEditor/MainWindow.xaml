@@ -13,7 +13,7 @@
         <BooleanToVisibilityConverter x:Key="boolToVis" />
         <viewmodels:ShowStonesBoolConverter x:Key="showStonesBool" />
         <viewmodels:ShowLevelBoolConverter x:Key="showLevelBool" />
-        <viewmodels:ShowIndividualLevelBoolConverter x:Key="hideLevelBool" />
+        <viewmodels:ReverseBoolConverter x:Key="reverseBoolToVis" />
         <viewmodels:MapObjectTypeToStringConverter x:Key="mapObjectToString" />
         <viewmodels:ShowMapObjectItemBoolConverter x:Key="mapObjectItemBool" />
         <viewmodels:ShowMapObjectPokemonBoolConverter x:Key="mapObjectPokemonBool" />
@@ -92,7 +92,7 @@
             <Button Command="{Binding SaveROMFile}" Content="Save" Width="40" />
             <TextBlock Text="{Binding RomFile}" Width="auto" Margin="5,0,0,0"/>
         </StackPanel>
-        <TabControl Grid.Row="1" Grid.Column="1">
+        <TabControl Grid.Row="1" Grid.Column="1" Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
             <TabItem Header="Pokemon" >
                 <Grid Visibility="{Binding Path=DataLoaded, Converter={StaticResource boolToVis}}">
                     <Grid.ColumnDefinitions>
@@ -572,8 +572,8 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
                                             <Button Content=" X " Command="{Binding DataContext.DeleteTrainerPokemon, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}" />
-                                            <TextBlock Text=" Level: " VerticalAlignment="Center" Visibility="{Binding DataContext.SelectedTrainer.AllSameLevel, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource hideLevelBool}}"/>
-                                            <TextBox Text="{Binding Level}" MinWidth="40" TextAlignment="Center" Visibility="{Binding DataContext.SelectedTrainer.AllSameLevel, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource hideLevelBool}}"/>
+                                            <TextBlock Text=" Level: " VerticalAlignment="Center" Visibility="{Binding DataContext.SelectedTrainer.AllSameLevel, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource reverseBoolToVis}}"/>
+                                            <TextBox Text="{Binding Level}" MinWidth="40" TextAlignment="Center" Visibility="{Binding DataContext.SelectedTrainer.AllSameLevel, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource reverseBoolToVis}}"/>
                                             <ComboBox SelectedIndex="{Binding Path=PokedexID}" ItemsSource="{Binding DataContext.PokeNames, RelativeSource={RelativeSource AncestorType=ListView}}" DisplayMemberPath="Name"/>
                                         </StackPanel>
                                     </DataTemplate>
@@ -709,6 +709,6 @@
                 </Grid>
             </TabItem>
         </TabControl>
-
+        <Label Grid.Row="1" Grid.Column="1" Content="{Binding StatusText}" Visibility="{Binding Path=DataLoaded, Converter={StaticResource reverseBoolToVis}}" />
     </Grid>
 </Window>
