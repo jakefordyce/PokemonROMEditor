@@ -453,6 +453,8 @@ namespace PokemonROMEditor.ViewModels
                 LoadSelectedMapTilesImages();
                 LoadSelectedMapImages();
                 OnPropertyChanged();
+                SelectedTileID = 0;
+                OnPropertyChanged("SelectedTileImage");
             }
         }
 
@@ -516,6 +518,36 @@ namespace PokemonROMEditor.ViewModels
             {
                 statusText = value;
                 OnPropertyChanged();
+            }
+        }        
+
+        public string ToggleMapObjectsText
+        {
+            get
+            {
+                if (showMapObjects)
+                {
+                    return "Hide Objects";
+                }
+                else
+                {
+                    return "Show Objects";
+                }
+            }
+        }
+
+        public string ToggleMapTilesText
+        {
+            get
+            {
+                if (showMapTiles)
+                {
+                    return "Hide Tiles";
+                }
+                else
+                {
+                    return "Show Tiles";
+                }
             }
         }
 
@@ -697,12 +729,44 @@ namespace PokemonROMEditor.ViewModels
             
         }
 
+        private bool showMapObjects;
+
+        public bool ShowMapObjects
+        {
+            get
+            {
+                return showMapObjects;
+            }
+            set
+            {
+                showMapObjects = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool showMapTiles;
+
+        public bool ShowMapTiles
+        {
+            get
+            {
+                return showMapTiles;
+            }
+            set
+            {
+                showMapTiles = value;
+                OnPropertyChanged();
+            }
+        }
+
         #endregion
 
         public ROMEditorViewModel()
         {
             DataLoaded = false;
             showFullPokemonView = true;
+            ShowMapObjects = true;
+            ShowMapTiles = true;
             StatusText = "Click Open to load a ROM";
             Moves = new ObservableCollection<Move>();
             Pokemons = new ObservableCollection<Pokemon>();
@@ -908,6 +972,36 @@ namespace PokemonROMEditor.ViewModels
                         OnPropertyChanged("ToggleButtonText");
                         OnPropertyChanged("ShowFullPokemonView");
                         OnPropertyChanged("ShowGridPokemonView");
+                    }));
+            }
+        }
+
+        private ICommand toggleMapObjects;
+
+        public ICommand ToggleMapObjects
+        {
+            get
+            {
+                return toggleMapObjects ?? (toggleMapObjects = new RelayCommand(
+                    x =>
+                    {
+                        ShowMapObjects = !ShowMapObjects;
+                        OnPropertyChanged("ToggleMapObjectsText");
+                    }));
+            }
+        }
+
+        private ICommand toggleMapTiles;
+
+        public ICommand ToggleMapTiles
+        {
+            get
+            {
+                return toggleMapTiles ?? (toggleMapTiles = new RelayCommand(
+                    x =>
+                    {
+                        ShowMapTiles = !ShowMapTiles;
+                        OnPropertyChanged("ToggleMapTilesText");
                     }));
             }
         }

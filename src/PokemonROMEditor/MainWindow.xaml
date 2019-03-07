@@ -632,16 +632,21 @@
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ListView Grid.Row="0" Grid.Column="0" ItemsSource="{Binding Maps}" SelectedItem="{Binding SelectedMap}">
+                    <StackPanel Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="0" Orientation="Horizontal">
+                        <Button Content="{Binding ToggleMapTilesText}" Command="{Binding ToggleMapTiles}" Width="100"/>
+                        <Button Content="{Binding ToggleMapObjectsText}" Command="{Binding ToggleMapObjects}" Width="100"/>
+                    </StackPanel>
+                    <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Maps}" SelectedItem="{Binding SelectedMap}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Label Content="{Binding MapName}"/>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-                    <ListView Grid.Column="1" Grid.Row="0" ItemsSource="{Binding Tiles}">
+                    <ListView Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Tiles}" Visibility="{Binding Path=ShowMapTiles, Converter={StaticResource boolToVis}}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Button Command="{Binding DataContext.SelectTile, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}">
@@ -657,8 +662,8 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>-->
-                    <Image Grid.Column="2" Grid.Row="0" Source="{Binding SelectedTileImage}" Width="64" Height="64" />
-                    <ScrollViewer Grid.Column="3" Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Image Grid.Column="2" Grid.Row="1" Source="{Binding SelectedTileImage}" Width="64" Height="64" Visibility="{Binding Path=ShowMapTiles, Converter={StaticResource boolToVis}}"/>
+                    <ScrollViewer Grid.Column="3" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                         <Grid >
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto" />
@@ -682,7 +687,7 @@
                             </ItemsControl>
                         </Grid>
                     </ScrollViewer>
-                    <ListView Grid.Row="0" Grid.Column="4" ItemsSource="{Binding SelectedMap.MapObjects}" SelectedItem="{Binding SelectedMapObject}">
+                    <ListView Grid.Row="1" Grid.Column="4" ItemsSource="{Binding SelectedMap.MapObjects}" SelectedItem="{Binding SelectedMapObject}" Visibility="{Binding Path=ShowMapObjects, Converter={StaticResource boolToVis}}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
