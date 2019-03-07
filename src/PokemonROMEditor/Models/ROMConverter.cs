@@ -45,7 +45,7 @@ namespace PokemonROMEditor.Models
         //The locations of the pointers for each shop.
         //The first 0x00 is the bike shop. The script for the bike shop menu doesn't actually look at the bike shop's items.
         //The second 0x00 is an unused shop. 
-        int[] shopPointerBytes = { 0x1D4EA, 0x74CB6, 0x5C898, 0x00, 0x5C9E4, 0x5692F, 0x560F8, 0x560FA, 0x48359, 0x49070, 0x49072, 0x1DD8B, 0x00, 0x75E81, 0x5D40C, 0x19C85};
+        int[] shopPointerBytes = { 0x1D4EA, 0x74CB6, 0x5C898, 0x00, 0x5C9E4, 0x5C92F, 0x560F8, 0x560FA, 0x48359, 0x49070, 0x49072, 0x1DD8B, 0x00, 0x75E81, 0x5D40C, 0x19C85};
 
         public ROMConverter() { }
 
@@ -1152,6 +1152,9 @@ namespace PokemonROMEditor.Models
 
                 if (romData[currentHeaderByte] < 24 && !(unusedMaps.Contains(i))) // Make sure we are saving the good maps. several maps have bad data.
                 {
+                    //save updated header info
+                    romData[currentHeaderByte] = (byte)maps.ElementAt(currentMap).TileSetID;
+
                     // uses the header info to get the location of the map's blocks.
                     blocksPointer1 = romData[currentHeaderByte + 3];
                     blocksPointer2 = romData[currentHeaderByte + 4] * 256;

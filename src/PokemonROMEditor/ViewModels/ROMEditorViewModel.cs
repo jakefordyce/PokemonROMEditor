@@ -440,6 +440,7 @@ namespace PokemonROMEditor.ViewModels
                     {
                         ob.SpriteChanged -= UpdateMapSprites;
                     }
+                    selectedMap.TileSetChanged -= UpdateSelectedMapTileset;
                 }
                 selectedMap = value;
                 if (selectedMap != null)
@@ -448,6 +449,7 @@ namespace PokemonROMEditor.ViewModels
                     {
                         ob.SpriteChanged += UpdateMapSprites;
                     }
+                    selectedMap.TileSetChanged += UpdateSelectedMapTileset;
                 }
                 //LoadTileset();
                 LoadSelectedMapTilesImages();
@@ -1112,6 +1114,18 @@ namespace PokemonROMEditor.ViewModels
         {
             DataLoaded = false;
             StatusText = "Saving...";
+            ///* Might need something like this to prevent bad data.
+            for (int m = 0; m < Maps.Count(); m++)
+            {
+                for (int i = 0; i < Maps.ElementAt(m).MapBlockValues.Count(); i++)
+                {
+                    if (Maps.ElementAt(m).MapBlockValues[i] >= BlockSets.ElementAt((int)Maps.ElementAt(m).TileSetID).Tiles.Count())
+                    {
+                        Maps.ElementAt(m).MapBlockValues[i] = 0;
+                    }
+                }
+            }
+            //*/            
             await Task.Run(() => romConverter.SaveROMDataToFile(romFile, Moves, Pokemons, TypeStrengths, AllTMs, EncounterZones, Trainers, Shops, Items, Maps, PokeTypes));
             DataLoaded = true;
         }
@@ -1428,6 +1442,14 @@ namespace PokemonROMEditor.ViewModels
         private void UpdateMapSprites(object sender, EventArgs e)
         {
             LoadSelectedMapImages();
+        }
+
+        private void UpdateSelectedMapTileset(object sender, EventArgs e)
+        {
+            LoadSelectedMapTilesImages();
+            LoadSelectedMapImages();
+            SelectedTileID = 0;
+            OnPropertyChanged("SelectedTileImage");
         }
 
         #endregion

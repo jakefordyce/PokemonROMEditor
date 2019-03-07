@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -20,11 +21,27 @@ namespace PokemonROMEditor.Models
         public int Height { get; set; }
         public int Width { get; set; }
         public int[] MapBlockValues { get; set; }
-        public TileSet TileSetID { get; }
+        private TileSet tileSetID;
+        public TileSet TileSetID
+        {
+            get { return tileSetID; }
+            set
+            {
+                tileSetID = value;
+                OnTileSetChanged();
+            }
+        }
         public ObservableCollection<MapObject> MapObjects { get; set; }
         public int Connections { get; set; } //this is temporary until we start working with the connection data.
         public int Signs { get; set; }
         public int Warps { get; set; }
+
+        public event EventHandler TileSetChanged;
+
+        protected virtual void OnTileSetChanged()
+        {
+            TileSetChanged?.Invoke(this, new EventArgs());
+        }
     }
 
     public class BlockSet

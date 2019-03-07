@@ -73,6 +73,11 @@
                 <x:Type Type="model:MoveAnimation" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider x:Key="tilesetEnum" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="model:TileSet" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </Window.Resources>
 
     <Grid>
@@ -627,7 +632,6 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
                         <ColumnDefinition Width="auto" />
-                        <ColumnDefinition Width="auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
@@ -646,24 +650,28 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-                    <ListView Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Tiles}" Visibility="{Binding Path=ShowMapTiles, Converter={StaticResource boolToVis}}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Button Command="{Binding DataContext.SelectTile, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}">
-                                    <Image Source="{Binding}"/>
-                                </Button>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                    <!--<ListView Grid.Column="1" Grid.Row="0" ItemsSource="{Binding SpriteImages}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Image Source="{Binding}"/>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>-->
-                    <Image Grid.Column="2" Grid.Row="1" Source="{Binding SelectedTileImage}" Width="64" Height="64" Visibility="{Binding Path=ShowMapTiles, Converter={StaticResource boolToVis}}"/>
-                    <ScrollViewer Grid.Column="3" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Grid.Column="1" Grid.Row="1" Visibility="{Binding Path=ShowMapTiles, Converter={StaticResource boolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <ComboBox Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" SelectedItem="{Binding Path=SelectedMap.TileSetID}" ItemsSource="{Binding Source={StaticResource tilesetEnum}}"/>
+                        <ListView Grid.Column="0" Grid.Row="1" ItemsSource="{Binding Tiles}" >
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SelectTile, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}">
+                                        <Image Source="{Binding}"/>
+                                    </Button>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <Image Grid.Column="1" Grid.Row="1" Source="{Binding SelectedTileImage}" Width="64" Height="64"/>
+                    </Grid>
+                    <ScrollViewer Grid.Column="2" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                         <Grid >
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto" />
@@ -687,7 +695,7 @@
                             </ItemsControl>
                         </Grid>
                     </ScrollViewer>
-                    <ListView Grid.Row="1" Grid.Column="4" ItemsSource="{Binding SelectedMap.MapObjects}" SelectedItem="{Binding SelectedMapObject}" Visibility="{Binding Path=ShowMapObjects, Converter={StaticResource boolToVis}}">
+                    <ListView Grid.Column="3" Grid.Row="1" ItemsSource="{Binding SelectedMap.MapObjects}" SelectedItem="{Binding SelectedMapObject}" Visibility="{Binding Path=ShowMapObjects, Converter={StaticResource boolToVis}}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
