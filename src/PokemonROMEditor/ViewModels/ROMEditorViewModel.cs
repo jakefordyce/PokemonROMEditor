@@ -450,10 +450,9 @@ namespace PokemonROMEditor.ViewModels
                         ob.SpriteChanged += UpdateMapSprites;
                     }
                     selectedMap.TileSetChanged += UpdateSelectedMapTileset;
+                    LoadSelectedMapTilesImages();
+                    LoadSelectedMapImages();
                 }
-                //LoadTileset();
-                LoadSelectedMapTilesImages();
-                LoadSelectedMapImages();
                 OnPropertyChanged();
                 SelectedTileID = 0;
                 OnPropertyChanged("SelectedTileImage");
@@ -1333,18 +1332,7 @@ namespace PokemonROMEditor.ViewModels
                 s.SpriteBitmap = createdBitmap;
                 sourceBitmap.Dispose();
             }
-        }
-
-        /*
-        private void LoadSpriteImages()
-        {
-            SpriteImages.Clear();
-            foreach(var s in Sprites)
-            {
-                SpriteImages.Add(Bitmap2BitmapSource(s.SpriteBitmap));
-            }
-        }
-        //*/
+        }        
 
         private void LoadSelectedMapTilesImages()
         {

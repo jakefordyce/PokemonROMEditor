@@ -1,5 +1,6 @@
 This tab lets you edit the game's maps in the following ways:
 
+* Change the tileset
 * Change the background tiles
 * Change the location of each object
 * Change the sprite of each object (first dropdown box)
