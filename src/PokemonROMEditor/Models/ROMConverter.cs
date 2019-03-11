@@ -40,7 +40,7 @@ namespace PokemonROMEditor.Models
         int moveNamesByte = 720896; //The data for move names starts at 0xB0000 bytes into the file which is 720896 in Decimal.
 
         int typesBankByte = 0x20000; // bank 9
-        int typesPointer = 0x7DAE; // this is a pointer within a bank, not the full address        
+        int typesPointer = 0x7DAE; // this is a pointer within a bank, not the full address
 
         //The locations of the pointers for each shop.
         //The first 0x00 is the bike shop. The script for the bike shop menu doesn't actually look at the bike shop's items.
@@ -1008,6 +1008,7 @@ namespace PokemonROMEditor.Models
             int objectsPointer2;
             int currentObjectsByte;
             MapObject newMapObject;
+            MapWarp newMapWarp;
             int numOfObjects;
             int numOfExtraBytes;
 
@@ -1065,9 +1066,21 @@ namespace PokemonROMEditor.Models
 
                     currentObjectsByte++; // the first byte is the border block. We are skipping that for now.
 
-                    newMap.Warps = romData[currentObjectsByte]; // warps data. Skipping for now
-                    numOfExtraBytes = romData[currentObjectsByte] * 4 + 1;
-                    currentObjectsByte += numOfExtraBytes; 
+                    //newMap.Warps = romData[currentObjectsByte]; // warps data. Skipping for now
+                    //numOfExtraBytes = romData[currentObjectsByte] * 4 + 1;
+                    //currentObjectsByte += numOfExtraBytes;
+
+                    newMap.WarpsLeaving = new ObservableCollection<MapWarp>();
+                    int numOfWarps = romData[currentObjectsByte++];
+                    for(int w = 0; w < numOfWarps; w++)
+                    {
+                        newMapWarp = new MapWarp();
+                        newMapWarp.YPosition = romData[currentObjectsByte++];
+                        newMapWarp.XPosition = romData[currentObjectsByte++];
+                        newMapWarp.DestinationWarpID = romData[currentObjectsByte++];
+                        newMapWarp.MapID = romData[currentObjectsByte++];
+                        newMap.WarpsLeaving.Add(newMapWarp);
+                    }
 
                     newMap.Signs = romData[currentObjectsByte]; // Signs data. Skipping for now
                     numOfExtraBytes = romData[currentObjectsByte] * 3 + 1;
@@ -1117,6 +1130,19 @@ namespace PokemonROMEditor.Models
                         newMap.MapObjects.Add(newMapObject);
                     }
 
+                    newMap.WarpsArriving = new ObservableCollection<MapWarp>();
+                    numOfWarps = newMap.WarpsLeaving.Count();
+                    for (int w = 0; w < numOfWarps; w++)
+                    {
+                        newMapWarp = new MapWarp();
+                        currentObjectsByte += 2; //Skipping the first 2 bytes for now until I see if I actually need to modify them.
+                        newMapWarp.YPosition = romData[currentObjectsByte++];
+                        newMapWarp.XPosition = romData[currentObjectsByte++];
+                        newMapWarp.MapID = w; // using this to show the index, it isn't actually the MapID
+                        newMap.WarpsArriving.Add(newMapWarp);
+                    }
+
+                    //add arriving warps here.
                     maps.Add(newMap);
                 }
                 
@@ -1141,6 +1167,7 @@ namespace PokemonROMEditor.Models
             int currentObjectsByte;
             int numOfExtraBytes;
             int currentMap = 0; //using this to keep track of which map index to use since we skipped loading some of the 247 maps.
+            int warpEventDisplacement;
 
             for (int i = 0; i < 248; i++) //There are somehow 248 maps in the game.
             {
@@ -1172,9 +1199,17 @@ namespace PokemonROMEditor.Models
                     objectsPointer2 = romData[currentHeaderByte + 11 + (numOfConnections * 11)] * 256;
                     currentObjectsByte = currentBank + objectsPointer1 + objectsPointer2;
 
-                    currentObjectsByte++; // the first byte is the border block. We are skipping that for now.
-                    numOfExtraBytes = maps.ElementAt(currentMap).Warps * 4 + 1; // warps data. Skipping for now
-                    currentObjectsByte += numOfExtraBytes;
+                    currentObjectsByte++; // the first byte is the border block. We are skipping that for now.                    
+
+                    // Save the warps
+                    romData[currentObjectsByte++] = (byte)maps.ElementAt(currentMap).WarpsLeaving.Count();
+                    foreach(var w in maps.ElementAt(currentMap).WarpsLeaving)
+                    {
+                        romData[currentObjectsByte++] = (byte)w.YPosition;
+                        romData[currentObjectsByte++] = (byte)w.XPosition;
+                        romData[currentObjectsByte++] = (byte)w.DestinationWarpID;
+                        romData[currentObjectsByte++] = (byte)w.MapID;
+                    }
 
                     numOfExtraBytes = maps.ElementAt(currentMap).Signs * 3 + 1; // Signs data. Skipping for now
                     currentObjectsByte += numOfExtraBytes;
@@ -1188,7 +1223,7 @@ namespace PokemonROMEditor.Models
                         romData[currentObjectsByte++] = (byte)(obj.XPosition + 4);
                         romData[currentObjectsByte++] = (byte)obj.Movement;
                         romData[currentObjectsByte++] = (byte)obj.Facing;
-                        currentObjectsByte++; //skipping the textstringID for now
+                        currentObjectsByte++; //skipping the textstringID for now since we aren't changing the objects
                         if(obj.ObjectType == MapObjectType.Item)
                         {
                             romData[currentObjectsByte++] = (byte)obj.Item;
@@ -1204,6 +1239,15 @@ namespace PokemonROMEditor.Models
                             romData[currentObjectsByte++] = (byte)obj.TrainerNum;
                         }
                         // No extra data here for Person types so just skipping that for now.
+                    }
+                    
+                    foreach (var w in maps.ElementAt(currentMap).WarpsArriving)
+                    {
+                        warpEventDisplacement = CalcEventDisplacement(w.XPosition, w.YPosition, maps.ElementAt(currentMap).Width);
+                        romData[currentObjectsByte++] = (byte)(warpEventDisplacement % 256);
+                        romData[currentObjectsByte++] = (byte)(warpEventDisplacement / 256);
+                        romData[currentObjectsByte++] = (byte)w.YPosition;
+                        romData[currentObjectsByte++] = (byte)w.XPosition;
                     }
 
                     currentMap++;
@@ -1288,6 +1332,16 @@ namespace PokemonROMEditor.Models
             onesNum = hexNum % 16;
 
             return (tensNum * 10) + onesNum;
+        }
+
+        private int CalcEventDisplacement(int xpos, int ypos, int mapWidth)
+        {
+            int startByte = 0xc6ef; //this is used in the formula to find the first 2 bytes of the warp arrive data.
+            int result = 0;
+
+            result = startByte + mapWidth + (mapWidth + 6) * (ypos / 2) + (xpos / 2);
+
+            return result;
         }
 
         //This is for finding a letter based on the given byte (loading from the ROM)

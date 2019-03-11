@@ -34,7 +34,8 @@ namespace PokemonROMEditor.Models
         public ObservableCollection<MapObject> MapObjects { get; set; }
         public int Connections { get; set; } //this is temporary until we start working with the connection data.
         public int Signs { get; set; }
-        public int Warps { get; set; }
+        public ObservableCollection<MapWarp> WarpsLeaving { get; set; }
+        public ObservableCollection<MapWarp> WarpsArriving { get; set; }
 
         public event EventHandler TileSetChanged;
 
@@ -121,6 +122,37 @@ namespace PokemonROMEditor.Models
         {
             SpriteChanged?.Invoke(this, new EventArgs());
         }
+    }
+
+    public class MapWarp
+    {
+        public event EventHandler PositionChanged;
+
+        private int yPosition;
+
+        public int YPosition
+        {
+            get { return yPosition; }
+            set { yPosition = value; OnPositionChanged(); }
+        }
+
+        private int xPosition;
+
+        public int XPosition
+        {
+            get { return xPosition; }
+            set { xPosition = value; OnPositionChanged(); }
+        }
+
+        public int DestinationWarpID { get; set; }
+
+        public int MapID { get; set; }
+
+        protected virtual void OnPositionChanged()
+        {
+            PositionChanged?.Invoke(this, new EventArgs());
+        }
+
     }
 
     public class MapObjectSprite

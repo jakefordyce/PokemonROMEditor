@@ -634,6 +634,7 @@
                         <ColumnDefinition Width="auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -642,6 +643,7 @@
                     <StackPanel Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="0" Orientation="Horizontal">
                         <Button Content="{Binding ToggleMapTilesText}" Command="{Binding ToggleMapTiles}" Width="100"/>
                         <Button Content="{Binding ToggleMapObjectsText}" Command="{Binding ToggleMapObjects}" Width="100"/>
+                        <Button Content="{Binding ToggleMapWarpsText}" Command="{Binding ToggleMapWarps}" Width="100"/>
                     </StackPanel>
                     <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Maps}" SelectedItem="{Binding SelectedMap}">
                         <ListView.ItemTemplate>
@@ -719,6 +721,49 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+                    <Grid Grid.Column="4" Grid.Row="1" Visibility="{Binding Path=ShowMapWarps, Converter={StaticResource boolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="0" Grid.Row="0" Content="Warps To Other Maps"/>
+                        <ListView Grid.Column="0" Grid.Row="1" ItemsSource="{Binding SelectedMap.WarpsLeaving}" SelectedItem="{Binding SelectedMapWarp}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Y:"/>
+                                        <TextBox Text="{Binding YPosition}" Width="30"/>
+                                        <Label Content="X:"/>
+                                        <TextBox Text="{Binding XPosition}" Width="30"/>
+                                        <Label Content="Destination Warp Num"/>
+                                        <Label Content="{Binding DestinationWarpID}" Width="30"/>
+                                        <Label Content="Destination Map"/>
+                                        <Label Content="{Binding MapID}" Width="30"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <Label Grid.Column="0" Grid.Row="2" Content="Warps From Other Maps"/>
+                        <ListView Grid.Column="0" Grid.Row="3" ItemsSource="{Binding SelectedMap.WarpsArriving}" SelectedItem="{Binding SelectedMapWarpArrive}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Y:"/>
+                                        <TextBox Text="{Binding YPosition}" Width="30"/>
+                                        <Label Content="X:"/>
+                                        <TextBox Text="{Binding XPosition}" Width="30"/>
+                                        <Label Content="Warp Num"/>
+                                        <Label Content="{Binding MapID}" Width="30"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>                    
                 </Grid>
             </TabItem>
         </TabControl>

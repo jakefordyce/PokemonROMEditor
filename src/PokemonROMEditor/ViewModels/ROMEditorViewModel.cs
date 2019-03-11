@@ -440,6 +440,14 @@ namespace PokemonROMEditor.ViewModels
                     {
                         ob.SpriteChanged -= UpdateMapSprites;
                     }
+                    foreach (var warp in SelectedMap.WarpsLeaving)
+                    {
+                        warp.PositionChanged -= UpdateMapSprites;
+                    }
+                    foreach (var warp in SelectedMap.WarpsArriving)
+                    {
+                        warp.PositionChanged -= UpdateMapSprites;
+                    }
                     selectedMap.TileSetChanged -= UpdateSelectedMapTileset;
                 }
                 selectedMap = value;
@@ -448,6 +456,14 @@ namespace PokemonROMEditor.ViewModels
                     foreach (var ob in SelectedMap.MapObjects)
                     {
                         ob.SpriteChanged += UpdateMapSprites;
+                    }
+                    foreach (var warp in SelectedMap.WarpsLeaving)
+                    {
+                        warp.PositionChanged += UpdateMapSprites;
+                    }
+                    foreach (var warp in SelectedMap.WarpsArriving)
+                    {
+                        warp.PositionChanged += UpdateMapSprites;
                     }
                     selectedMap.TileSetChanged += UpdateSelectedMapTileset;
                     LoadSelectedMapTilesImages();
@@ -507,6 +523,38 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private MapWarp selectedMapWarp;
+
+        public MapWarp SelectedMapWarp
+        {
+            get
+            {
+                return selectedMapWarp;
+            }
+            set
+            {
+                selectedMapWarp = value;
+                LoadSelectedMapImages(); //should eventually find a way that doesn't require redrawing the entire map.
+                OnPropertyChanged();
+            }
+        }
+
+        private MapWarp selectedMapWarpArrive;
+
+        public MapWarp SelectedMapWarpArrive
+        {
+            get
+            {
+                return selectedMapWarpArrive;
+            }
+            set
+            {
+                selectedMapWarpArrive = value;
+                LoadSelectedMapImages(); //should eventually find a way that doesn't require redrawing the entire map.
+                OnPropertyChanged();
+            }
+        }
+
         private string statusText;
 
         public string StatusText
@@ -548,6 +596,21 @@ namespace PokemonROMEditor.ViewModels
                 else
                 {
                     return "Show Tiles";
+                }
+            }
+        }
+
+        public string ToggleMapWarpsText
+        {
+            get
+            {
+                if (showMapWarps)
+                {
+                    return "Hide Warps";
+                }
+                else
+                {
+                    return "Show Warps";
                 }
             }
         }
@@ -760,6 +823,15 @@ namespace PokemonROMEditor.ViewModels
             }
         }
 
+        private bool showMapWarps;
+
+        public bool ShowMapWarps
+        {
+            get { return showMapWarps; }
+            set { showMapWarps = value; OnPropertyChanged(); }
+        }
+
+
         #endregion
 
         public ROMEditorViewModel()
@@ -767,7 +839,8 @@ namespace PokemonROMEditor.ViewModels
             DataLoaded = false;
             showFullPokemonView = true;
             ShowMapObjects = true;
-            ShowMapTiles = true;
+            ShowMapTiles = false;
+            ShowMapWarps = false;
             StatusText = "Click Open to load a ROM";
             Moves = new ObservableCollection<Move>();
             Pokemons = new ObservableCollection<Pokemon>();
@@ -1003,6 +1076,21 @@ namespace PokemonROMEditor.ViewModels
                     {
                         ShowMapTiles = !ShowMapTiles;
                         OnPropertyChanged("ToggleMapTilesText");
+                    }));
+            }
+        }
+
+        private ICommand toggleMapWarps;
+
+        public ICommand ToggleMapWarps
+        {
+            get
+            {
+                return toggleMapWarps ?? (toggleMapWarps = new RelayCommand(
+                    x =>
+                    {
+                        ShowMapWarps = !ShowMapWarps;
+                        OnPropertyChanged("ToggleMapWarpsText");
                     }));
             }
         }
@@ -1405,6 +1493,54 @@ namespace PokemonROMEditor.ViewModels
                             }
                         }
                     }
+                    foreach(var warp in selectedMap.WarpsLeaving)
+                    {
+                        if(i == MatchesBlock(warp.XPosition, warp.YPosition, selectedMap.Width))
+                        {
+                            int xpos = (warp.XPosition % 2) * 16;
+                            int ypos = (warp.YPosition % 2) * 16;
+                            
+                            if (selectedMapWarp != null) //highlite the selected warp.
+                            {
+                                if (selectedMapWarp.XPosition == warp.XPosition && selectedMapWarp.YPosition == warp.YPosition)
+                                {
+                                    g.DrawRectangle(new Pen(Color.Purple, 2), new Rectangle(xpos+2, ypos+2, 12, 12));
+                                }
+                                else
+                                {
+                                    g.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle(xpos+2, ypos+2, 12, 12));
+                                }
+                            }else
+                            {
+                                g.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle(xpos+2, ypos+2, 12, 12));
+                            }
+                        }
+                    }
+                    foreach (var warp in selectedMap.WarpsArriving)
+                    {
+                        if (i == MatchesBlock(warp.XPosition, warp.YPosition, selectedMap.Width))
+                        {
+                            int xpos = (warp.XPosition % 2) * 16;
+                            int ypos = (warp.YPosition % 2) * 16;
+
+                            if (selectedMapWarpArrive != null) //highlite the selected warp.
+                            {
+                                if (selectedMapWarpArrive.XPosition == warp.XPosition && selectedMapWarpArrive.YPosition == warp.YPosition)
+                                {
+                                    g.DrawRectangle(new Pen(Color.Green, 2), new Rectangle(xpos, ypos, 16, 16));
+                                }
+                                else
+                                {
+                                    g.DrawRectangle(new Pen(Color.Yellow, 2), new Rectangle(xpos, ypos, 16, 16));
+                                }
+                            }
+                            else
+                            {
+                                g.DrawRectangle(new Pen(Color.Yellow, 2), new Rectangle(xpos, ypos, 16, 16));
+                            }
+                        }
+                    }
+
                 }
 
                 SelectedMapTiles.Add(new MapTile(i, Bitmap2BitmapSource(createdBitmap)));
