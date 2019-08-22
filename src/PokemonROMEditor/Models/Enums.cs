@@ -27,6 +27,18 @@ namespace PokemonROMEditor.Models
     };
     //*/
 
+    public enum GameType
+    {
+        Unknown = 0,
+        Red = 1,
+        Blue = 2,
+        Green = 3,
+        Yellow = 4,
+        Gold = 5,       // Added unsupported games for future-proofing
+        Silver = 6,
+        Crystal = 7
+    }
+
     public enum EvolveType
     {
         NONE = 0,

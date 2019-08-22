@@ -35,7 +35,10 @@ namespace PokemonROMEditor.ViewModels
 
         public string RomFile
         {
-            get { return romFile; }
+            get
+            {
+                return romFile;
+            }
         }
 
         public string ToggleButtonText
@@ -53,6 +56,17 @@ namespace PokemonROMEditor.ViewModels
                 
             }
             
+        }
+
+        private GameType gameName;
+
+        public GameType GameName
+        {
+            get { return gameName; }
+            set
+            {
+                gameName = value;
+            }
         }
 
         private ObservableCollection<Move> moves;
@@ -1146,6 +1160,7 @@ namespace PokemonROMEditor.ViewModels
                 OnPropertyChanged("RomFile");
                 //load data from ROM
                 await Task.Run(() => romConverter.LoadROMDataFromFile(romFile));
+                GameName = romConverter.LoadRomName();
                 PokeTypes = romConverter.LoadPokeTypes();
                 Moves = romConverter.LoadMoves();
                 Pokemons = romConverter.LoadPokemon();

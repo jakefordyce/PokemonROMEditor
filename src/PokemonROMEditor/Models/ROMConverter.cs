@@ -15,6 +15,8 @@ namespace PokemonROMEditor.Models
         private Dictionary<int, int> PokedexIDs;
         private Dictionary<int, int> IndexIDs;
 
+        int gameNameStartByte = 0x134; // Game name (eg. POKEMON RED     ) starts at 0x134 and ends at 0x142
+
         int mapHeaderPointersByte = 430; // 0x1AE 
         int shopsStartByte = 9282; //The data for the pokemarts inventories starts at byte 0x2442
         int mewStartByte = 16987; // Mew's stats start at byte 0x425B
@@ -76,6 +78,52 @@ namespace PokemonROMEditor.Models
             SavePokeTypes(types);
             // then just write the new byte array to file.
             File.WriteAllBytes(fileName, romData);
+        }
+
+        public GameType LoadRomName()
+        {
+            string name = "";
+            byte[] readBytes = new byte[16];
+            byte readByte;
+
+            // Read each character into bytes to then convert to string. Game name is encoded in plain ASCII, unlike other strings in the ROM.
+            for (int i = 0; i < 16; i++)
+            {
+                readByte = romData[i + gameNameStartByte];
+                if (readByte == 0)
+                    readBytes[i] = 32;  // Replace null char with space so we can trim it later.
+                else
+                    readBytes[i] = readByte;
+            }
+            name = Encoding.ASCII.GetString(readBytes).Trim();
+
+            // Associate each identifier to a game
+            switch (name)
+            {
+                case "POKEMON RED":
+                    return GameType.Red;
+
+                case "POKEMON BLUE":
+                    return GameType.Blue;
+
+                case "POKEMON YELLOW":
+                    return GameType.Yellow;
+
+                case "POKEMON GREEN":
+                    return GameType.Green;
+
+                /* Unimplemented games
+                case "POKEMON_GLDAAUE":
+                    return GameType.Gold;
+                case "POKEMON_SLVAAXE":
+                    return GameType.Silver;
+                case "PM_CRYSTAL BYTE":
+                    return GameType.Crystal;                 
+                */
+
+                default:
+                    return GameType.Unknown;
+            }
         }
 
         public ObservableCollection<Move> LoadMoves()
@@ -563,6 +611,7 @@ namespace PokemonROMEditor.Models
 
             return typeStrengths;
         }
+
 
         private void SaveTypeStrengths(ObservableCollection<TypeStrength> str)
         {
